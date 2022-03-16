@@ -13,8 +13,8 @@
 `define INST_FUNCT3_AND 3'b111
 
 
-// I type instruction, used for load and computation, total count: 14
-// I型指令，用于加载和计算，共14条
+// I type instruction, used for load and computation
+// I型指令，用于加载和计算
 `define INST_OP_TYPE_I_L 7'b0000011
 // load, total count: 5
 // 加载，共5条
