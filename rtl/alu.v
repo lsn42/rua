@@ -1,5 +1,5 @@
-`include "../define/const.v"
-`include "../define/inst.v"
+`include "define/const.v"
+`include "define/inst.v"
 
 module alu(
     input wire clk, input wire rst,

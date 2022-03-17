@@ -1,6 +1,6 @@
 // register
-`include "../define/const.v"
-`include "../define/inst.v"
+`include "define/const.v"
+`include "define/inst.v"
 
 module register (
     input wire clk, input wire rst,

@@ -8,7 +8,7 @@
       "type": "shell",
       "command": "python",
       "args": [
-        ".vscode/vv.py",
+        "./script/vv.py",
         "build",
         "${file}"
       ],
@@ -18,12 +18,12 @@
       }
     },
     {
-      "label": "build and run",
+      "label": "run",
       "type": "shell",
       "command": "python",
       "args": [
-        ".vscode/vv.py",
-        "buildrun",
+        "./script/vv.py",
+        "run",
         "${file}"
       ],
       "group": {

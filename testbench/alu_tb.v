@@ -1,4 +1,4 @@
-`include "../rtl/alu.v"
+`include "rtl/alu.v"
 
 `timescale 1ps/1ps
 
@@ -25,11 +25,11 @@ module alu_tb();
     $dumpfile(".\\wave\\alu_tb.vcd");
     $dumpvars;
     @(posedge clk);
-    opcode = 0110011;
-    funct3 = 000;
-    funct7 = 0000000;
-    rs1 = 1;
-    rs2 = 2;
+    opcode = 7'b0110011;
+    funct3 = 3'b000;
+    funct7 = 7'b0000000;
+    rs1 = 114514;
+    rs2 = 1919810;
     @(posedge clk);
     $finish;
   end

@@ -1,6 +1,6 @@
 // program counter
-`include "../define/const.v"
-`include "../define/inst.v"
+`include "define/const.v"
+`include "define/inst.v"
 module pc(
     input wire clk, input wire rst,
     input wire pause,
