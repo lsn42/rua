@@ -7,7 +7,7 @@ module register (
     input wire[`REGISTER_ADDR] addr,
     output reg out
   );
-  reg[`XLEN - 1: 0] data[`REGISTER_COUNT - 1: 0];
+  reg[`XLEN_WIDTH] data[`REGISTER_COUNT - 1: 0];
   always @(* )
     begin
       out <= data[addr];
