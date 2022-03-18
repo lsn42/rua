@@ -3,11 +3,13 @@
 
 module alu(
     input wire clk, input wire rst,
+    input wire[`XLEN_WIDTH] inst,
     input wire[`XLEN_WIDTH] rs1, input wire[`XLEN_WIDTH] rs2,
-    input wire[6: 0] opcode,
-    input wire[2: 0] funct3, input wire [6: 0] funct7,
     output reg [`XLEN_WIDTH] rd
   );
+  wire[6: 0] opcode = inst[6: 0];
+  wire[2: 0] funct3 = inst[14: 12];
+  wire[6: 0] funct7 = inst[31: 25];
   // combinational logic
   // 组合逻辑
   always @(* ) begin

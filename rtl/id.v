@@ -3,7 +3,10 @@
 
 module id(
     input wire clk, input wire rst,
-    input wire[`XLEN_WIDTH] inst
+    input wire[`XLEN_WIDTH] inst,
+    output reg[`REG_ADDR] regs_addr1, output reg[`REG_ADDR] regs_addr2,
+    output reg[`REG_ADDR] regs_write_addr,
+    output reg regs_write_en
   );
   wire[6: 0] opcode = inst[6: 0];
   wire[2: 0] funct3 = inst[14: 12];
@@ -20,6 +23,10 @@ module id(
   always @(* ) begin
     case (opcode)
       `INST_OP_TYPE_R: begin
+        regs_addr1 <= rs1;
+        regs_addr2 <= rs2;
+        regs_write_en <= `true;
+        regs_write_addr <= rd;
       end
     endcase
   end
