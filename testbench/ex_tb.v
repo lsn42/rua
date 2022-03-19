@@ -40,7 +40,7 @@ module ex_tb();
     $dumpfile("./wave/ex_tb.vcd");
     $dumpvars;
     $readmemh("./program/hex/regs_1.hex", regs.data, 0, 31);
-    $readmemb("./program/bin/addi.bin", rom.data, 0, 1);
+    $readmemb("./program/bin/add.bin", rom.data, 0, 1);
     rst = 1;
     @(posedge clk);
     rst = 0;
