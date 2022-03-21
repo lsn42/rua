@@ -25,8 +25,8 @@ module ex_tb();
   pc pc(.clk(clk), .rst(rst), .pause(), .out(pc_ifu));
   ifu ifu(.clk(clk), .rst(rst), .pc(pc_ifu), .inst(ifu_out), .rom_data(ifu_rom_data), .rom_addr(ifu_rom_addr));
   id id(.clk(clk), .rst(rst), .inst(ifu_out), .regs_addr1(regs_addr1), .regs_addr2(regs_addr2), .regs_write_addr(regs_write_addr), .regs_write_en(regs_write_en));
-  regs regs(.clk(clk), .rst(rst), .addr1(regs_addr1), .out1(regs_out1), .addr2(regs_addr2), .out2(regs_out2), .write_en(regs_write_en), .write_addr(regs_write_addr), .in(regs_in));
-  ex ex(.clk(clk), .rst(rst), .inst(ifu_out), .reg_in1(regs_out1), .reg_in2(regs_out2), .out(regs_in));
+  regs regs(.clk(clk), .rst(rst), .addr1(regs_addr1), .out1(regs_out1), .addr2(regs_addr2), .out2(regs_out2), .write_en(regs_write_en), .write_addr(regs_write_addr), .write_data(regs_in));
+  ex ex(.clk(clk), .rst(rst), .inst(ifu_out), .regs_in1(regs_out1), .regs_in2(regs_out2), .out(regs_in));
 
   parameter clk_period = 10;
   initial

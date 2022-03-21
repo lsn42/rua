@@ -6,7 +6,8 @@ module regs (
     input wire clk, input wire rst,
     input wire[`REG_ADDR] addr1, output reg[`XLEN_WIDTH] out1,
     input wire[`REG_ADDR] addr2, output reg[`XLEN_WIDTH] out2,
-    input wire write_en, input wire[`REG_ADDR] write_addr, input wire[`XLEN_WIDTH] in
+    input wire write_en, input wire[`REG_ADDR] write_addr,
+    input wire[`XLEN_WIDTH] write_data
   );
 
   reg[`XLEN_WIDTH] data[`REG_COUNT - 1: 0];
@@ -21,7 +22,7 @@ module regs (
   always @(posedge clk) begin
     if (write_en && write_addr != 0)
     begin
-      data[write_addr] <= in;
+      data[write_addr] <= write_data;
     end
   end
   always @(* )
