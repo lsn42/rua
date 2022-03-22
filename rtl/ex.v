@@ -2,8 +2,6 @@
 `include "define/const.v"
 `include "define/inst.v"
 
-`include "rtl/alu.v"
-
 module ex(
     input wire clk, input wire rst,
     input wire[`XLEN_WIDTH] inst,
@@ -20,9 +18,6 @@ module ex(
     output reg[`XLEN_WIDTH] mem_write_data
   );
 
-  reg[`XLEN_WIDTH] alu_in1, alu_in2;
-  wire[`XLEN_WIDTH] alu_out;
-
   wire[6: 0] opcode = inst[6: 0];
   wire[2: 0] funct3 = inst[14: 12];
   wire[6: 0] funct7 = inst[31: 25];
@@ -34,7 +29,8 @@ module ex(
   wire[11: 0] imm_b = {inst[31], inst[7], inst[30: 25], inst[11: 8]};
   wire[19: 0] imm_j = {inst[31], inst[19: 12], inst[20], inst[30: 21]};
 
-  alu alu(.inst(inst), .in1(alu_in1), .in2(alu_in2), .out(alu_out));
+  // TODO: lots of the computation operation done by copilot, still need more carefully check
+  // TODO: 部分计算操作是用copilot写的，还需要仔细检查
 
   always @(* ) begin
     pc_jump = `false;
@@ -44,49 +40,125 @@ module ex(
     mem_write_data = 0;
     case (opcode)
       `INST_OP_TYPE_R: begin
-        alu_in1 = regs_in1;
-        alu_in2 = regs_in2;
-        regs_write_data = alu_out;
+        case (funct3)
+          `INST_FUNCT3_ADD_SUB: begin
+            if (funct7 == `INST_FUNCT7_1) begin // ADD
+              regs_write_data = regs_in1 + regs_in2;
+            end
+            else if (funct7 == `INST_FUNCT7_2) begin // SUB
+              regs_write_data = regs_in1 - regs_in2;
+            end
+          end
+          `INST_FUNCT3_SLL: begin
+            regs_write_data = regs_in1 << regs_in2[4: 0];
+          end
+          `INST_FUNCT3_SLT: begin
+            regs_write_data = (regs_in1 < regs_in2) ? 1 : 0;
+          end
+          `INST_FUNCT3_SLTU: begin
+            regs_write_data = ($unsigned(regs_in1) << $unsigned(regs_in2))? 1 : 0;
+          end
+          `INST_FUNCT3_XOR: begin
+            regs_write_data = regs_in1 ^ regs_in2;
+          end
+          `INST_FUNCT3_SRL_SRA: begin
+            if (funct7 == `INST_FUNCT7_1) begin // SRL
+              regs_write_data = regs_in1 >> regs_in2[4: 0];
+            end
+            else if (funct7 == `INST_FUNCT7_2) begin // SRA
+              regs_write_data = $signed(regs_in1) >> regs_in2[4: 0];
+            end
+          end
+          `INST_FUNCT3_OR: begin
+            regs_write_data = regs_in1 | regs_in2;
+          end
+          `INST_FUNCT3_AND: begin
+            regs_write_data = regs_in1 & regs_in2;
+          end
+        endcase
       end
       `INST_OP_TYPE_I_JALR: begin
-        alu_in1 = regs_in1;
-        alu_in2 = $signed(imm_i);
         regs_write_data = pc + 4;
         pc_jump = `true;
-        pc_jump_addr = alu_out;
+        pc_jump_addr = regs_in1 + $signed(imm_i);
       end
       `INST_OP_TYPE_I_L: begin
-        alu_in1 = regs_in1;
-        alu_in2 = $signed(imm_i);
         regs_write_data = mem_read_data;
-        mem_read_addr = 0;
+        mem_read_addr = regs_in1 + $signed(imm_i);
       end
       `INST_OP_TYPE_I_I: begin
-        alu_in1 = regs_in1;
-        alu_in2 = $signed(imm_i);
-        regs_write_data = alu_out;
+        case (funct3)
+          `INST_FUNCT3_ADDI: begin
+            regs_write_data = regs_in1 + imm_i;
+          end
+          `INST_FUNCT3_SLTI: begin
+            regs_write_data = (regs_in1 < imm_i) ? 1 : 0;
+          end
+          `INST_FUNCT3_SLTIU: begin
+            regs_write_data = ($unsigned(regs_in1) < $unsigned(imm_i)) ? 1 : 0;
+          end
+          `INST_FUNCT3_XORI: begin
+            regs_write_data = regs_in1 ^ imm_i;
+          end
+          `INST_FUNCT3_ORI: begin
+            regs_write_data = regs_in1 | imm_i;
+          end
+          `INST_FUNCT3_ANDI: begin
+            regs_write_data = regs_in1 & imm_i;
+          end
+          `INST_FUNCT3_SLLI: begin
+            regs_write_data = regs_in1 << imm_i[24: 20];
+          end
+          `INST_FUNCT3_SRLI_SRAI: begin
+            if (funct7 == `INST_FUNCT7_1) begin // SRLI
+              regs_write_data = regs_in1 >> imm_i[24: 20];
+            end
+            else if (funct7 == `INST_FUNCT7_2) begin // SRAI
+              regs_write_data = regs_in1 << imm_i[24: 20];
+            end
+          end
+        endcase
       end
       `INST_OP_TYPE_I_S: begin
-        ; // SYSTEM CALL
+        // SYSTEM CALL
+        if (funct12 == `INST_FUNCT12_1) begin // ECALL
+          ;
+        end
+        else if (funct12 == `INST_FUNCT12_2) begin // EBREAK
+          ;
+        end
       end
       `INST_OP_TYPE_S: begin
-        alu_in1 = regs_in1;
-        alu_in2 = $signed(imm_s);
-        regs_write_data = alu_out;
+        regs_write_data = regs_in1 + $signed(imm_s);
       end
       `INST_OP_TYPE_U_LUI: begin
-        regs_write_data = alu_out;
+        regs_write_data = regs_in1 + imm_u;
       end
       `INST_OP_TYPE_U_AUIPC: begin
-        alu_in1 = regs_in1;
-        alu_in2 = {imm_u, {12{1'b0}}};
-        regs_write_data = alu_out;
+        regs_write_data = pc + imm_u;
       end
       `INST_OP_TYPE_B: begin
-        alu_in1 = regs_in1;
-        alu_in2 = regs_in2;
-        pc_jump = alu_out ? `true : `false;
-        pc_jump_addr = alu_out? pc + imm_b : 0;
+        case (funct3)
+          `INST_FUNCT3_BEQ: begin
+            pc_jump = (regs_in1 == regs_in2) ? `true : `false;
+          end
+          `INST_FUNCT3_BNE: begin
+            pc_jump = (regs_in1 != regs_in2) ? `true : `false;
+          end
+          `INST_FUNCT3_BLT: begin
+            pc_jump = ($signed(regs_in1) < $signed(regs_in2)) ? `true : `false;
+          end
+          `INST_FUNCT3_BGE: begin
+            pc_jump = ($signed(regs_in1) >= $signed(regs_in2)) ? `true : `false;
+          end
+          `INST_FUNCT3_BLTU: begin
+            pc_jump = ($unsigned(regs_in1) < $unsigned(regs_in2)) ? `true : `false;
+          end
+          `INST_FUNCT3_BGEU: begin
+            pc_jump = ($unsigned(regs_in1) >= $unsigned(regs_in2)) ? `true : `false;
+          end
+        endcase
+        pc_jump_addr = pc_jump ? pc + imm_b : 0;
       end
       `INST_OP_TYPE_J_JAL: begin
         pc_jump = `true;
