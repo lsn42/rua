@@ -1,3 +1,5 @@
+`timescale 1ps/1ps
+
 `include "rtl/ex.v"
 `include "rtl/id.v"
 `include "rtl/ifu.v"
@@ -9,7 +11,7 @@ module ex_tb();
   reg clk, rst;
 
   wire[`XLEN_WIDTH] ifu_out;
-  wire[`XLEN_WIDTH] pc_ifu;
+  wire[`XLEN_WIDTH] pc;
   wire[`XLEN_WIDTH] ifu_rom_data;
   wire[`XLEN_WIDTH] ifu_rom_addr;
 
@@ -21,31 +23,77 @@ module ex_tb();
   wire[`XLEN_WIDTH] regs_out1;
   wire[`XLEN_WIDTH] regs_out2;
 
-  rom rom(.clk(clk), .rst(rst), .addr(ifu_rom_addr), .out(ifu_rom_data));
-  pc pc(.clk(clk), .rst(rst), .pause(), .out(pc_ifu));
-  ifu ifu(.clk(clk), .rst(rst), .pc(pc_ifu), .inst(ifu_out), .rom_data(ifu_rom_data), .rom_addr(ifu_rom_addr));
-  id id(.clk(clk), .rst(rst), .inst(ifu_out), .regs_addr1(regs_addr1), .regs_addr2(regs_addr2), .regs_write_addr(regs_write_addr), .regs_write_en(regs_write_en));
-  regs regs(.clk(clk), .rst(rst), .addr1(regs_addr1), .out1(regs_out1), .addr2(regs_addr2), .out2(regs_out2), .write_en(regs_write_en), .write_addr(regs_write_addr), .write_data(regs_in));
-  ex ex(.clk(clk), .rst(rst), .inst(ifu_out), .regs_in1(regs_out1), .regs_in2(regs_out2), .out(regs_in));
+  rom dut_rom(
+        .clk(clk), .rst(rst),
+        .addr(ifu_rom_addr),
+        .out(ifu_rom_data));
+
+  pc dut_pc(
+       .clk(clk), .rst(rst),
+       .pause(),
+       .out(pc));
+
+  ifu dut_ifu(
+        .clk(clk), .rst(rst),
+        .pc(pc), .inst(ifu_out),
+        .rom_data(ifu_rom_data), .rom_addr(ifu_rom_addr));
+
+  id dut_id(
+       .clk(clk), .rst(rst),
+       .inst(ifu_out),
+
+       .regs_addr1(regs_addr1), .regs_addr2(regs_addr2),
+       .regs_write_en(regs_write_en),
+       .regs_write_addr(regs_write_addr),
+
+       .mem_read_en(), .mem_write_en()
+     );
+
+  regs dut_regs(
+         .clk(clk), .rst(rst),
+
+         .addr1(regs_addr1), .out1(regs_out1),
+         .addr2(regs_addr2), .out2(regs_out2),
+
+         .write_en(regs_write_en), .write_addr(regs_write_addr),
+         .write_data(regs_in),
+
+         .mem_read_addr(), .mem_read_data(),
+
+         .mem_write_en(), .mem_write_addr(),
+         .mem_write_data()
+       );
+
+  ex dut_ex(
+       .clk(clk), .rst(rst),
+       .inst(ifu_out),
+
+       .regs_in1(regs_out1), .regs_in2(regs_out2),
+       .regs_write_data(regs_in),
+
+       .pc(pc),
+       .pc_jump(), .pc_jump_addr(),
+
+       .mem_read_addr(), .mem_read_data(),
+       .mem_write_en(), .mem_write_addr(),
+       .mem_write_data()
+     );
 
   parameter clk_period = 10;
   initial
-    clk = 0;
+    clk = 1;
   always#(clk_period / 2) clk = ~clk;
 
   integer i;
 
-  initial
-  begin
+  initial begin
     $dumpfile("./wave/ex_tb.vcd");
     $dumpvars;
-    $readmemh("./program/hex/regs_1.hex", regs.data, 0, 31);
-    $readmemb("./program/bin/add.bin", rom.data, 0, 1);
+    $readmemh("./program/hex/empty32.hex", dut_regs.data, 0, 31);
+    $readmemb("./program/bin/5addi.bin", dut_rom.data, 0, 19);
     rst = 1;
-    @(posedge clk);
-    rst = 0;
-    for (i = 0; i < 10; i = i + 1)
-    begin
+    @(posedge clk) rst = 0;
+    for (i = 0; i < 10; i = i + 1)begin
       @(posedge clk);
     end
     $finish;

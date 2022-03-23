@@ -10,8 +10,7 @@ module ex(
     output reg[`XLEN_WIDTH] regs_write_data,
 
     input wire[`XLEN_WIDTH] pc,
-    output reg pc_jump,
-    output reg[`XLEN_WIDTH] pc_jump_addr,
+    output reg pc_jump, output reg[`XLEN_WIDTH] pc_jump_addr,
 
     output reg[`XLEN_WIDTH] mem_read_addr, input wire[`XLEN_WIDTH] mem_read_data,
     output reg mem_write_en, output reg[`XLEN_WIDTH] mem_write_addr,
@@ -30,7 +29,6 @@ module ex(
   wire[19: 0] imm_j = {inst[31], inst[19: 12], inst[20], inst[30: 21]};
 
   // TODO: lots of the computation operation done by copilot, still need more carefully check
-  // TODO: 部分计算操作是用copilot写的，还需要仔细检查
 
   always @(* ) begin
     pc_jump = `false;
@@ -41,7 +39,7 @@ module ex(
     case (opcode)
       `INST_OP_TYPE_R: begin
         case (funct3)
-          `INST_FUNCT3_ADD_SUB: begin
+          `INST_FUNCT3_ADD, `INST_FUNCT3_SUB: begin
             if (funct7 == `INST_FUNCT7_1) begin // ADD
               regs_write_data = regs_in1 + regs_in2;
             end
@@ -61,7 +59,7 @@ module ex(
           `INST_FUNCT3_XOR: begin
             regs_write_data = regs_in1 ^ regs_in2;
           end
-          `INST_FUNCT3_SRL_SRA: begin
+          `INST_FUNCT3_SRL, `INST_FUNCT3_SRA: begin
             if (funct7 == `INST_FUNCT7_1) begin // SRL
               regs_write_data = regs_in1 >> regs_in2[4: 0];
             end
@@ -109,7 +107,7 @@ module ex(
           `INST_FUNCT3_SLLI: begin
             regs_write_data = regs_in1 << imm_i[24: 20];
           end
-          `INST_FUNCT3_SRLI_SRAI: begin
+          `INST_FUNCT3_SRLI, `INST_FUNCT3_SRAI: begin
             if (funct7 == `INST_FUNCT7_1) begin // SRLI
               regs_write_data = regs_in1 >> imm_i[24: 20];
             end

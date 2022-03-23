@@ -1,12 +1,14 @@
 // R type instruction, used for computation, total count: 9
 // R型指令，用于计算，共9条
 `define INST_OP_TYPE_R 7'b0110011
-`define INST_FUNCT3_ADD_SUB 3'b000
+`define INST_FUNCT3_ADD 3'b000
+`define INST_FUNCT3_SUB 3'b000
 `define INST_FUNCT3_SLL 3'b001
 `define INST_FUNCT3_SLT 3'b010
 `define INST_FUNCT3_SLTU 3'b011
 `define INST_FUNCT3_XOR 3'b100
-`define INST_FUNCT3_SRL_SRA 3'b101
+`define INST_FUNCT3_SRL 3'b101
+`define INST_FUNCT3_SRA 3'b101
 `define INST_FUNCT3_OR 3'b110
 `define INST_FUNCT3_AND 3'b111
 
@@ -35,11 +37,9 @@
 `define INST_FUNCT3_XORI 3'b100
 `define INST_FUNCT3_ORI  3'b110
 `define INST_FUNCT3_ANDI 3'b111
-
-// computation(register-immediate), total count: 3 (SRI and SRAI shared same funct3 code)
-// 计算（寄存器-立即数），共3条（SRI和SRAI使用同一函数码）
 `define INST_FUNCT3_SLLI 3'b001
-`define INST_FUNCT3_SRLI_SRAI 3'b101
+`define INST_FUNCT3_SRLI 3'b101
+`define INST_FUNCT3_SRAI 3'b101
 
 // system call
 `define INST_OP_TYPE_I_S 7'b1110111

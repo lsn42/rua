@@ -1,6 +1,8 @@
 `define XLEN 32
 `define XLEN_WIDTH `XLEN-1:0
 
+`define BYTE_WIDTH 7:0
+
 `define true 1
 `define false 0
 

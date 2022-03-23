@@ -1,14 +1,12 @@
-// 100左右的斐波那契数列
-.globl _start;
+.globl main;
+.type main, @function;
 
-_start:
-  addi r1, r0, 100
-  addi r2, r0, 0
-  addi r3, r0, 1
+main:
+  addi t1, x0, 100
+  addi t2, x0, 0
+  addi t3, x0, 1
 
 again:
-  addi r2, r2, r3
-  // output r2
-  addi r3, r3, r2
-  // output r3
-  blt r3, r1, again
+  add t2, t2, t3
+  add t3, t3, t2
+  blt t3, t1, again
