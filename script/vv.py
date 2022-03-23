@@ -1,6 +1,6 @@
+# iverilog -> vvp -> gtkwave
 import sys
 import os
-import re
 import subprocess
 import logging
 
@@ -11,14 +11,10 @@ if __name__ == "__main__":
     logging.debug("args: "+str(sys.argv))
     func = sys.argv[1]
     files = sys.argv[2:]
-    name = (lambda x: x[:x.rfind(".")])(os.path.basename(files[0]))
+    name, ext = os.path.splitext(os.path.basename(files[0]))
 
-    if not os.path.exists("./out"):
-        os.mkdir("./out")
-    if not os.path.exists("./wave"):
-        os.mkdir("./wave")
-    if not os.path.exists("./wave/gtkw"):
-        os.mkdir("./wave/gtkw")
+    for p in ("./out", "./wave", "./wave/gtkw",):
+        os.makedirs(p, exist_ok=True)
 
     if (name.rfind("_tb") != -1):
         if (func == "build"):

@@ -89,8 +89,8 @@ module ex_tb();
   initial begin
     $dumpfile("./wave/ex_tb.vcd");
     $dumpvars;
-    $readmemh("./program/hex/empty32.hex", dut_regs.data, 0, 31);
-    $readmemb("./program/bin/5addi.bin", dut_rom.data, 0, 19);
+    $readmemh("./program/mem/hex/empty32.word.mem", dut_regs.data, 0, 31);
+    $readmemh("./program/mem/hex/fibonacci.byte.mem", dut_rom.data, 0, 5331);
     rst = 1;
     @(posedge clk) rst = 0;
     for (i = 0; i < 10; i = i + 1)begin
