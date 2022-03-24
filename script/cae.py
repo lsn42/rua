@@ -1,4 +1,4 @@
-# c/assembly -> elf -> disassembly
+# c/assembly -> elf -> disassembly+readelf+mem
 import sys
 import os
 import logging
@@ -21,9 +21,11 @@ if __name__ == "__main__":
     for p in (ELF_PATH, DISASSEMBLY_PATH, READELF_PATH,):
         os.makedirs(p, exist_ok=True)
 
+    elf = os.path.join(ELF_PATH, name+".elf")
+
     cmd = ["riscv64-unknown-elf-gcc"] +\
         PLATFORM_ARGS +\
-        ["-o", os.path.join(ELF_PATH, name+".elf")] +\
+        ["-o", elf] +\
         [file]
     logging.debug("cmd: " + str(cmd))
     if (subprocess.Popen(cmd).wait() != 0):
@@ -31,7 +33,7 @@ if __name__ == "__main__":
 
     cmd = ["riscv64-unknown-elf-objdump"] +\
         ["--disassemble-all"] +\
-        [os.path.join(ELF_PATH, name+".elf")]
+        [elf]
     logging.debug("cmd: " + str(cmd))
     sp = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     with open(os.path.join(DISASSEMBLY_PATH, name+".riscv"), "wb") as f:
@@ -41,10 +43,17 @@ if __name__ == "__main__":
 
     cmd = ["readelf"] +\
         ["-hS"] +\
-        [os.path.join(ELF_PATH, name+".elf")]
+        [elf]
     logging.debug("cmd: " + str(cmd))
     sp = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     with open(os.path.join(READELF_PATH, name+".readelf.txt"), "wb") as f:
         f.write(sp.stdout.read())
     if (sp.wait() != 0):
+        exit()
+
+    cmd = ["python", "./script/2mem.py"] +\
+        ["hex", "byte", "0", "0"] +\
+        [elf]
+    logging.debug("cmd: " + str(cmd))
+    if (subprocess.Popen(cmd).wait() != 0):
         exit()
