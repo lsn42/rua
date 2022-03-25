@@ -6,17 +6,15 @@ module ifu (
     input wire clk, input wire rst,
     input wire[`XLEN_WIDTH] pc,
     input wire[`XLEN_WIDTH] rom_data, output reg[`XLEN_WIDTH] rom_addr,
-    output reg[`XLEN_WIDTH] inst
+    output reg[`XLEN_WIDTH] inst, output reg[`XLEN_WIDTH] inst_pc
   );
 
-  always @(posedge clk or posedge rst) begin
-    if (rst) begin
-      rom_addr <= 0;
-      inst <= 0;
-    end
-    else begin
-      rom_addr <= pc;
-      inst <= rom_data;
-    end
+  always @(* ) begin
+    rom_addr = pc;
+    inst = rom_data;
+  end
+
+  always @(posedge clk) begin
+    inst_pc = pc;
   end
 endmodule

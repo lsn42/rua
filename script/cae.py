@@ -52,7 +52,7 @@ if __name__ == "__main__":
         exit()
 
     cmd = ["python", "./script/2mem.py"] +\
-        ["hex", "byte", "0", "0"] +\
+        ["hex", "byte", "0", "16"] +\
         [elf]
     logging.debug("cmd: " + str(cmd))
     if (subprocess.Popen(cmd).wait() != 0):

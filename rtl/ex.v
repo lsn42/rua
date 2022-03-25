@@ -32,6 +32,7 @@ module ex(
 
   always @(* ) begin
     pc_jump = `false;
+    regs_write_data = 0;
     mem_read_addr = 0;
     mem_write_en = `false;
     mem_write_addr = 0;
@@ -87,7 +88,7 @@ module ex(
       `INST_OP_TYPE_I_I: begin
         case (funct3)
           `INST_FUNCT3_ADDI: begin
-            regs_write_data = regs_in1 + imm_i;
+            regs_write_data = regs_in1 + $signed(imm_i);
           end
           `INST_FUNCT3_SLTI: begin
             regs_write_data = (regs_in1 < imm_i) ? 1 : 0;
@@ -130,10 +131,10 @@ module ex(
         regs_write_data = regs_in1 + $signed(imm_s);
       end
       `INST_OP_TYPE_U_LUI: begin
-        regs_write_data = regs_in1 + imm_u;
+        regs_write_data = regs_in1 + {imm_u, {12{1'b0}}};
       end
       `INST_OP_TYPE_U_AUIPC: begin
-        regs_write_data = pc + imm_u;
+        regs_write_data = pc + {imm_u, {12{1'b0}}};
       end
       `INST_OP_TYPE_B: begin
         case (funct3)

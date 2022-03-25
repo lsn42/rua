@@ -13,7 +13,7 @@ module rom (
       out <= 0;
     end
     else begin
-      out <= {data[addr], data[addr + 1], data[addr + 2], data[addr + 3]};
+      out <= {data[addr + 3], data[addr + 2], data[addr + 1], data[addr]};
     end
   end
 
