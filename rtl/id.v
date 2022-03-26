@@ -3,7 +3,7 @@
 
 module id(
     input wire clk, input wire rst,
-    input wire[`XLEN_WIDTH] inst,
+    input wire[`XLEN_WIDTH] inst, input wire[`XLEN_WIDTH]inst_addr,
 
     output reg[`REG_ADDR] regs_addr1, output reg[`REG_ADDR] regs_addr2,
     output reg regs_write_en,

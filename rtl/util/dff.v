@@ -1,3 +1,6 @@
+`ifndef UTIL_DFF_V
+`define UTIL_DFF_V
+
 module dff #(
     parameter width = 32
   )(
@@ -15,3 +18,5 @@ module dff #(
   end
 
 endmodule
+
+`endif

@@ -4,12 +4,14 @@
 
 module ex(
     input wire clk, input wire rst,
-    input wire[`XLEN_WIDTH] inst,
+    input wire[`XLEN_WIDTH] inst, input wire[`XLEN_WIDTH]inst_addr,
 
+    output reg[`REG_ADDR] regs_addr1, output reg[`REG_ADDR] regs_addr2,
     input wire[`XLEN_WIDTH] regs_in1, input wire[`XLEN_WIDTH] regs_in2,
+    output reg regs_write_en,
+    output reg[`REG_ADDR] regs_write_addr,
     output reg[`XLEN_WIDTH] regs_write_data,
 
-    input wire[`XLEN_WIDTH] pc,
     output reg pc_jump, output reg[`XLEN_WIDTH] pc_jump_addr,
 
     output reg[`XLEN_WIDTH] mem_read_addr, input wire[`XLEN_WIDTH] mem_read_data,
@@ -22,6 +24,10 @@ module ex(
   wire[6: 0] funct7 = inst[31: 25];
   wire[6: 0] funct12 = inst[31: 20];
 
+  wire[`REG_ADDR] rd = inst[11: 7];
+  wire[`REG_ADDR] rs1 = inst[19: 15];
+  wire[`REG_ADDR] rs2 = inst[24: 20];
+
   wire[11: 0] imm_i = inst[31: 20];
   wire[11: 0] imm_s = {inst[31: 25], inst[11: 7]};
   wire[19: 0] imm_u = inst[31: 12];
@@ -32,6 +38,10 @@ module ex(
 
   always @(* ) begin
     pc_jump = `false;
+    regs_addr1 <= 0;
+    regs_addr2 <= 0;
+    regs_write_en <= `false;
+    regs_write_addr <= 0;
     regs_write_data = 0;
     mem_read_addr = 0;
     mem_write_en = `false;
@@ -39,6 +49,10 @@ module ex(
     mem_write_data = 0;
     case (opcode)
       `INST_OP_TYPE_R: begin
+        regs_addr1 <= rs1;
+        regs_addr2 <= rs2;
+        regs_write_en <= `true;
+        regs_write_addr <= rd;
         case (funct3)
           `INST_FUNCT3_ADD, `INST_FUNCT3_SUB: begin
             if (funct7 == `INST_FUNCT7_1) begin // ADD
@@ -77,18 +91,27 @@ module ex(
         endcase
       end
       `INST_OP_TYPE_I_JALR: begin
-        regs_write_data = pc + 4;
+        regs_addr1 <= rs1;
+        regs_write_en <= `true;
+        regs_write_addr <= rd;
+        regs_write_data = inst_addr + 4;
         pc_jump = `true;
         pc_jump_addr = regs_in1 + $signed(imm_i);
       end
       `INST_OP_TYPE_I_L: begin
+        regs_addr1 <= rs1;
+        regs_write_en <= `true;
+        regs_write_addr <= rd;
         regs_write_data = mem_read_data;
         mem_read_addr = regs_in1 + $signed(imm_i);
       end
       `INST_OP_TYPE_I_I: begin
+        regs_addr1 <= rs1;
+        regs_write_en <= `true;
+        regs_write_addr <= rd;
         case (funct3)
           `INST_FUNCT3_ADDI: begin
-            regs_write_data = regs_in1 + $signed(imm_i);
+            regs_write_data = $signed(regs_in1) + $signed(imm_i);
           end
           `INST_FUNCT3_SLTI: begin
             regs_write_data = (regs_in1 < imm_i) ? 1 : 0;
@@ -128,15 +151,23 @@ module ex(
         end
       end
       `INST_OP_TYPE_S: begin
+        regs_addr1 <= rs1;
+        regs_addr2 <= rs2;
         regs_write_data = regs_in1 + $signed(imm_s);
       end
       `INST_OP_TYPE_U_LUI: begin
+        regs_write_en <= `true;
+        regs_write_addr <= rd;
         regs_write_data = regs_in1 + {imm_u, {12{1'b0}}};
       end
       `INST_OP_TYPE_U_AUIPC: begin
-        regs_write_data = pc + {imm_u, {12{1'b0}}};
+        regs_write_en <= `true;
+        regs_write_addr <= rd;
+        regs_write_data = inst_addr + {imm_u, {12{1'b0}}};
       end
       `INST_OP_TYPE_B: begin
+        regs_addr1 <= rs1;
+        regs_addr2 <= rs2;
         case (funct3)
           `INST_FUNCT3_BEQ: begin
             pc_jump = (regs_in1 == regs_in2) ? `true : `false;
@@ -157,11 +188,14 @@ module ex(
             pc_jump = ($unsigned(regs_in1) >= $unsigned(regs_in2)) ? `true : `false;
           end
         endcase
-        pc_jump_addr = pc_jump ? pc + imm_b : 0;
+        pc_jump_addr = pc_jump ? $signed(inst_addr) + $signed(imm_b) : 0;
       end
       `INST_OP_TYPE_J_JAL: begin
+        regs_write_en <= `true;
+        regs_write_addr <= rd;
+        regs_write_data <= inst_addr + 4;
         pc_jump = `true;
-        pc_jump_addr = pc + imm_j;
+        pc_jump_addr = $signed(inst_addr) + $signed({imm_j, 1'b0});
       end
     endcase
   end

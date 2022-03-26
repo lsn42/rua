@@ -9,7 +9,7 @@
 `include "rtl/regs.v"
 `include "rtl/rom.v"
 `include "rtl/pc.v"
-`include "rtl/pipeline/dff.v"
+`include "rtl/util/dff.v"
 
 module ex_tb();
   reg clk, rst;
@@ -22,13 +22,14 @@ module ex_tb();
   wire[`XLEN_WIDTH] pc_jump_addr;
 
   wire[`XLEN_WIDTH] ifu_out;
-  wire[`XLEN_WIDTH] inst_pc;
 
   wire[`XLEN_WIDTH] regs_in;
   wire[`REG_ADDR] regs_addr1;
   wire[`REG_ADDR] regs_addr2;
-  wire[`REG_ADDR] regs_write_addr;
+
   wire regs_write_en;
+  wire[`REG_ADDR] regs_write_addr;
+
   wire[`XLEN_WIDTH] regs_out1;
   wire[`XLEN_WIDTH] regs_out2;
 
@@ -43,19 +44,20 @@ module ex_tb();
        .pause(),
        .out(pc));
 
+  wire[`XLEN_WIDTH] inst_addr_if;
+  dff#(`XLEN) dut_dff_inst_addr_if(
+       .clk(clk), .rst(rst),
+       .d(pc), .q(inst_addr_if));
+
   ifu dut_ifu(
         .clk(clk), .rst(rst),
         .pc(pc),
         .rom_data(rom_data), .rom_addr(rom_addr),
-        .inst(ifu_out), .inst_pc(inst_pc));
+        .inst(ifu_out));
 
   id dut_id(
        .clk(clk), .rst(rst),
-       .inst(ifu_out),
-
-       .regs_addr1(regs_addr1), .regs_addr2(regs_addr2),
-       .regs_write_en(regs_write_en),
-       .regs_write_addr(regs_write_addr),
+       .inst(),
 
        .mem_read_en(), .mem_write_en()
      );
@@ -63,8 +65,22 @@ module ex_tb();
   wire[`XLEN_WIDTH] id_ex_inst;
   dff#(`XLEN) dut_dff_id_ex(
        .clk(clk), .rst(rst),
-       .d(ifu_out),
-       .q(id_ex_inst));
+       .d(ifu_out), .q(id_ex_inst));
+
+  wire[`XLEN_WIDTH] inst_addr_ex;
+  dff#(`XLEN) dut_dff_inst_addr_ex(
+       .clk(clk), .rst(rst),
+       .d(inst_addr_if), .q(inst_addr_ex));
+       
+  wire regs_write_en_ex;
+  dff#(1) dut_dff_regs_write_en_ex(
+       .clk(clk), .rst(rst),
+       .d(regs_write_en), .q(regs_write_en_ex));
+       
+  wire[`REG_ADDR] regs_write_addr_ex;
+  dff#(5) dut_dff_regs_write_addr_ex(
+       .clk(clk), .rst(rst),
+       .d(regs_write_addr), .q(regs_write_addr_ex));
 
   regs dut_regs(
          .clk(clk), .rst(rst),
@@ -83,12 +99,15 @@ module ex_tb();
 
   ex dut_ex(
        .clk(clk), .rst(rst),
-       .inst(id_ex_inst),
+       .inst(ifu_out), .inst_addr(inst_addr_if),
+
+       .regs_addr1(regs_addr1), .regs_addr2(regs_addr2),
+       .regs_write_en(regs_write_en),
+       .regs_write_addr(regs_write_addr),
 
        .regs_in1(regs_out1), .regs_in2(regs_out2),
        .regs_write_data(regs_in),
 
-       .pc(pc),
        .pc_jump(pc_jump), .pc_jump_addr(pc_jump_addr),
 
        .mem_read_addr(), .mem_read_data(),
@@ -111,7 +130,7 @@ module ex_tb();
     rst = 1;
     @(posedge clk) rst = 0;
     // pc_jump = `true;
-    for (i = 0; i < 10; i = i + 1)begin
+    for (i = 0; i < 100; i = i + 1)begin
       @(posedge clk);
     end
     $finish;
