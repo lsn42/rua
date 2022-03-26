@@ -126,7 +126,7 @@ module ex_tb();
     $dumpfile("./wave/ex_tb.vcd");
     $dumpvars;
     $readmemh("./program/mem/hex/empty32.word.mem", dut_regs.data, 0, 31);
-    $readmemh("./program/mem/hex/fibonacci.byte.mem", dut_rom.data, 0, 5331);
+    $readmemh("./program/mem/hex/fibonacci.byte.mem", dut_rom.data, 0, 5299);
     rst = 1;
     @(posedge clk) rst = 0;
     // pc_jump = `true;

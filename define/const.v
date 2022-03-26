@@ -6,7 +6,7 @@
 `define true 1
 `define false 0
 
-`define CPU_START_ADDR 32'h8c
+`define CPU_START_ADDR 32'hb0
 
 `define REG_COUNT 32
 `define REG_ADDR 4:0
