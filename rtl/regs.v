@@ -32,10 +32,20 @@ module regs (
   end
 
   always @(* ) begin
-    out1 <= data[addr1];
+    if (write_en && write_addr == addr1) begin
+      out1 = write_data;
+    end
+    else begin
+      out1 <= data[addr1];
+    end
   end
   always @(* ) begin
-    out2 <= data[addr2];
+    if (write_en && write_addr == addr2) begin
+      out2 = write_data;
+    end
+    else begin
+      out2 <= data[addr2];
+    end
   end
   always @(* ) begin
     mem_read_data <= data[mem_read_addr];

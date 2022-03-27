@@ -1,28 +1,33 @@
+// instruction decode
 `include "define/const.v"
 `include "define/inst.v"
 
 module id(
     input wire[`XLEN_WIDTH] inst, input wire[`XLEN_WIDTH] inst_addr,
 
-    output reg[`REG_ADDR] regs_addr1, output reg[`REG_ADDR] regs_addr2,
-    input wire[`XLEN_WIDTH] regs_data1, input wire[`XLEN_WIDTH] regs_data2,
+    output reg[`REG_ADDR] regs_addr1, input wire[`XLEN_WIDTH] regs_data1,
+    output reg[`REG_ADDR] regs_addr2, input wire[`XLEN_WIDTH] regs_data2,
 
     output reg[`XLEN_WIDTH] operand1, output reg[`XLEN_WIDTH] operand2,
 
-    output reg pause
+    input wire pause, output reg pause_signal
   );
 
   // instruction identification
+  // 指令识别
   wire[6: 0] opcode = inst[6: 0];
   wire[2: 0] funct3 = inst[14: 12];
   wire[6: 0] funct7 = inst[31: 25];
+  wire[6: 0] funct12 = inst[31: 20];
 
   // the address of register source and destination
+  // 源寄存器和目的寄存器的地址
   wire[`REG_ADDR] rs1 = inst[19: 15];
   wire[`REG_ADDR] rs2 = inst[24: 20];
   wire[`REG_ADDR] rd = inst[11: 7];
 
   // seperate different kinds of immediate from instruction
+  // 从指令中分割不同种类的立即数
   wire[11: 0] imm_i = inst[31: 20];
   wire[11: 0] imm_s = {inst[31: 25], inst[11: 7]};
   wire[19: 0] imm_u = inst[31: 12];
@@ -36,7 +41,7 @@ module id(
     regs_addr2 = 0;
     operand1 = 0;
     operand2 = 0;
-    pause = `false;
+    pause_signal = `false;
     case (opcode)
       `INST_OP_TYPE_R: begin
         regs_addr1 = rs1;
@@ -47,7 +52,7 @@ module id(
       `INST_OP_TYPE_I_JALR: begin
         regs_addr1 = rs1;
         operand1 = regs_data1;
-        operand2 = $signed(imm_i);
+        operand2 = inst_addr;
         // TODO: pause
       end
       `INST_OP_TYPE_I_I,
@@ -55,10 +60,14 @@ module id(
         regs_addr1 = rs1;
         operand1 = regs_data1;
         // SLLI/SRLI/SRAL won't affect by sign extension
+        // SLLI/SRLI/SRAL不会受符号扩展影响
         operand2 = $signed(imm_i);
       end
-      `INST_OP_TYPE_I_S:
-        ; // no need to do anything
+      `INST_OP_TYPE_I_S: begin
+        // no need to do anything currently
+        // 暂时不知道SYSTEM CALL指令如何处理
+        ;
+      end
       `INST_OP_TYPE_S: begin
         regs_addr1 = rs1;
         operand1 = regs_data1;
