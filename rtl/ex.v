@@ -12,9 +12,10 @@ module ex(
 
     output reg pc_jump, output reg[`XLEN_WIDTH] pc_jump_addr,
 
-    output reg mem_read_en, output reg[`XLEN_WIDTH] mem_read_addr,
-    output reg mem_write_en, output reg[`XLEN_WIDTH] mem_write_addr,
-    output reg[`XLEN_WIDTH] mem_write_data
+    output reg mem_load_en, output reg[`XLEN_WIDTH] mem_load_addr,
+    output reg[`REG_ADDR] mem_load_regs_addr,
+    output reg mem_store_en, output reg[`XLEN_WIDTH] mem_store_addr,
+    output reg[`XLEN_WIDTH] mem_store_data
   );
 
   // instruction identification
@@ -41,18 +42,23 @@ module ex(
   // TODO: lots of the computation operation done by copilot, still need more carefully check
 
   always @(* ) begin
+
+    // default value
+    // 默认值
     regs_write_en <= `false;
     regs_write_addr <= 0;
     regs_write_data = 0;
 
     pc_jump = `false;
-    pc_jump_addr = `CPU_START_ADDR;
+    pc_jump_addr = 0;
 
-    mem_read_en = `false;
-    mem_read_addr = 0;
-    mem_write_en = `false;
-    mem_write_addr = 0;
-    mem_write_data = 0;
+    mem_load_en = `false;
+    mem_load_addr = 0;
+    mem_load_regs_addr = 0;
+    mem_store_en = `false;
+    mem_store_addr = 0;
+    mem_store_data = 0;
+
     case (opcode)
       `INST_OP_TYPE_R: begin
         regs_write_en <= `true;
@@ -94,6 +100,7 @@ module ex(
           end
         endcase
       end
+
       `INST_OP_TYPE_I_JALR: begin
         regs_write_en <= `true;
         regs_write_addr <= rd;
@@ -101,10 +108,13 @@ module ex(
         pc_jump = `true;
         pc_jump_addr = operand1 + operand2;
       end
+
       `INST_OP_TYPE_I_L: begin
-        mem_read_en = `true;
-        mem_read_addr = operand1 + operand2;
+        mem_load_en = `true;
+        mem_load_addr = operand1 + operand2;
+        mem_load_regs_addr = rd;
       end
+
       `INST_OP_TYPE_I_I: begin
         regs_write_en <= `true;
         regs_write_addr <= rd;
@@ -141,6 +151,7 @@ module ex(
           end
         endcase
       end
+
       `INST_OP_TYPE_I_S: begin
         // no need to do anything currently
         // 暂时不知道SYSTEM CALL指令如何处理
@@ -151,15 +162,19 @@ module ex(
           ;
         end
       end
+
       `INST_OP_TYPE_S: begin
-        mem_write_en = `true;
-        mem_write_addr = operand1 + operand2;
+        mem_store_en = `true;
+        mem_store_addr = operand1 + $signed(imm_s);
+        mem_store_data = operand2;
       end
+
       `INST_OP_TYPE_U_LUI, `INST_OP_TYPE_U_AUIPC: begin
         regs_write_en <= `true;
         regs_write_addr <= rd;
         regs_write_data = operand1 + operand2;
       end
+
       `INST_OP_TYPE_B: begin
         case (funct3)
           `INST_FUNCT3_BEQ: begin
@@ -181,8 +196,9 @@ module ex(
             pc_jump = ($unsigned(operand1) >= $unsigned(operand2)) ? `true : `false;
           end
         endcase
-        pc_jump_addr = pc_jump ? $signed(inst_addr) + $signed(imm_b) : 0;
+        pc_jump_addr = pc_jump ? $signed(inst_addr) + $signed({imm_b, 1'b0}) : 0;
       end
+
       `INST_OP_TYPE_J_JAL: begin
         regs_write_en <= `true;
         regs_write_addr <= rd;
@@ -192,4 +208,5 @@ module ex(
       end
     endcase
   end
+
 endmodule

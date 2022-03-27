@@ -30,9 +30,9 @@ if __name__ == "__main__":
 
             cmd = ["gtkwave"] +\
                 ["--rcfile", os.path.join(os.path.expanduser("~"), ".gtkwaverc")] +\
+                ["-7", "-F", "-o"] +\
                 ["-f", os.path.join(".", "wave", name+".vcd")] +\
-                ["-a", os.path.join(".", "wave", "gtkw", name+".gtkw")] +\
-                ["-7"]
+                ["-a", os.path.join(".", "wave", "gtkw", name+".gtkw")]
             logging.debug(cmd)
             subprocess.Popen(cmd).wait()
 
@@ -40,9 +40,9 @@ if __name__ == "__main__":
 
             cmd = ["gtkwave"] +\
                 ["--rcfile", os.path.join(os.path.expanduser("~"), ".gtkwaverc")] +\
+                ["-7", "-F", "-o"] +\
                 ["-f", os.path.join(".", "wave", name+".vcd")] +\
-                ["-a", os.path.join(".", "wave", "gtkw", name+".gtkw")] +\
-                ["-7"]
+                ["-a", os.path.join(".", "wave", "gtkw", name+".gtkw")]
             logging.debug(cmd)
             subprocess.Popen(cmd).wait()
 

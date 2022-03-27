@@ -37,11 +37,16 @@ module id(
   // combinational logic
   // 组合逻辑
   always @(* ) begin
+    // TODO: pause
+
+    // default value
+    // 默认值
     regs_addr1 = 0;
     regs_addr2 = 0;
     operand1 = 0;
     operand2 = 0;
     pause_signal = `false;
+
     case (opcode)
       `INST_OP_TYPE_R: begin
         regs_addr1 = rs1;
@@ -52,16 +57,23 @@ module id(
       `INST_OP_TYPE_I_JALR: begin
         regs_addr1 = rs1;
         operand1 = regs_data1;
-        operand2 = inst_addr;
-        // TODO: pause
+        operand2 = $signed(imm_i);
+        pause_signal = `true;
       end
-      `INST_OP_TYPE_I_I,
+      `INST_OP_TYPE_I_I: begin
+        regs_addr1 = rs1;
+        operand1 = regs_data1;
+        // SLLI/SRLI/SRAL won't affect by sign extension
+        // SLLI/SRLI/SRAL不会受符号扩展影响
+        operand2 = $signed(imm_i);
+      end
       `INST_OP_TYPE_I_L: begin
         regs_addr1 = rs1;
         operand1 = regs_data1;
         // SLLI/SRLI/SRAL won't affect by sign extension
         // SLLI/SRLI/SRAL不会受符号扩展影响
         operand2 = $signed(imm_i);
+        pause_signal = `true;
       end
       `INST_OP_TYPE_I_S: begin
         // no need to do anything currently
@@ -70,8 +82,9 @@ module id(
       end
       `INST_OP_TYPE_S: begin
         regs_addr1 = rs1;
+        regs_addr2 = rs2;
         operand1 = regs_data1;
-        operand2 = $signed(imm_s);
+        operand2 = regs_data2;
       end
       `INST_OP_TYPE_U_LUI,
       `INST_OP_TYPE_U_AUIPC: begin
@@ -83,13 +96,14 @@ module id(
         regs_addr2 = rs2;
         operand1 = regs_data1;
         operand2 = regs_data2;
-        // TODO: pause
+        pause_signal = `true;
       end
       `INST_OP_TYPE_J_JAL: begin
         operand1 = inst_addr;
         operand2 = $signed({imm_j, 1'b0});
-        // TODO: pause
+        pause_signal = `true;
       end
     endcase
   end
+
 endmodule
