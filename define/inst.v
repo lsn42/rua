@@ -80,3 +80,5 @@
 // two type of funct12
 `define INST_FUNCT12_1 12'b000000000000
 `define INST_FUNCT12_2 12'b000000000001
+
+`define INST_NOP {{12{1'b0}}, {5{1'b0}}, `INST_FUNCT3_ADDI, {5{1'b0}}, `INST_OP_TYPE_I_I} // addi x0, x0, 0

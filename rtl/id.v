@@ -10,7 +10,7 @@ module id(
 
     output reg[`XLEN_WIDTH] operand1, output reg[`XLEN_WIDTH] operand2,
 
-    input wire pause, output reg pause_signal
+    output reg pause_signal, output reg flush_signal
   );
 
   // instruction identification
@@ -46,6 +46,7 @@ module id(
     operand1 = 0;
     operand2 = 0;
     pause_signal = `false;
+    flush_signal = `false;
 
     case (opcode)
       `INST_OP_TYPE_R: begin
@@ -70,8 +71,6 @@ module id(
       `INST_OP_TYPE_I_L: begin
         regs_addr1 = rs1;
         operand1 = regs_data1;
-        // SLLI/SRLI/SRAL won't affect by sign extension
-        // SLLI/SRLI/SRAL不会受符号扩展影响
         operand2 = $signed(imm_i);
         pause_signal = `true;
       end
@@ -96,7 +95,6 @@ module id(
         regs_addr2 = rs2;
         operand1 = regs_data1;
         operand2 = regs_data2;
-        pause_signal = `true;
       end
       `INST_OP_TYPE_J_JAL: begin
         operand1 = inst_addr;

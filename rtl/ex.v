@@ -15,7 +15,9 @@ module ex(
     output reg mem_load_en, output reg[`XLEN_WIDTH] mem_load_addr,
     output reg[`REG_ADDR] mem_load_regs_addr,
     output reg mem_store_en, output reg[`XLEN_WIDTH] mem_store_addr,
-    output reg[`XLEN_WIDTH] mem_store_data
+    output reg[`XLEN_WIDTH] mem_store_data,
+
+    output reg unpause_signal, output reg flush_signal
   );
 
   // instruction identification

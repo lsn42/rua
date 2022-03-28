@@ -3,8 +3,8 @@
 
 `define BYTE_WIDTH 7:0
 
-`define true 1
-`define false 0
+`define true 1'b1
+`define false 1'b0
 
 `define CPU_START_ADDR 32'h8c
 

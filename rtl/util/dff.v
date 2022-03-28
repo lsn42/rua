@@ -2,18 +2,19 @@
 `define UTIL_DFF_V
 
 module dff #(
-    parameter width = 32
+    parameter width = 32,
+    parameter flush_data = {width{1'b0}}
   )(
-    input wire clk, input wire rst,
+    input wire en, input wire clk, input wire rst,
     input wire[width - 1: 0] d, output reg[width - 1: 0] q
   );
 
   always @ (posedge clk or posedge rst) begin
     if (rst) begin
-      q <= 0;
+      q = flush_data;
     end
-    else begin
-      q <= d;
+    else if (en) begin
+      q = d;
     end
   end
 
