@@ -19,13 +19,13 @@ module regs (
 
   always @(posedge clk or posedge rst) begin
     if (rst) begin
-      data[0] = 0;
+      data[0] <= 0;
     end
     else if (write_en && write_addr != 0) begin
-      data[write_addr] = write_data;
+      data[write_addr] <= write_data;
     end
     else if (mem_write_en && mem_write_addr != 0) begin
-      data[mem_write_addr] = mem_write_data;
+      data[mem_write_addr] <= mem_write_data;
     end
   end
 

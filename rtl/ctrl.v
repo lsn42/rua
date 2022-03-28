@@ -15,11 +15,11 @@ module ctrl(
 
   always@(posedge clk or posedge rst) begin
     if (rst )begin
-      pause = `false;
+      pause <= `false;
     end
     else begin
       if (!pause_signal && unpause_signal) begin
-        pause = `false;
+        pause <= `false;
       end
     end
   end

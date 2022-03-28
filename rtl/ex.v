@@ -47,8 +47,8 @@ module ex(
 
     // default value
     // 默认值
-    regs_write_en <= `false;
-    regs_write_addr <= 0;
+    regs_write_en = `false;
+    regs_write_addr = 0;
     regs_write_data = 0;
 
     pc_jump = `false;
@@ -63,8 +63,8 @@ module ex(
 
     case (opcode)
       `INST_OP_TYPE_R: begin
-        regs_write_en <= `true;
-        regs_write_addr <= rd;
+        regs_write_en = `true;
+        regs_write_addr = rd;
         case (funct3)
           `INST_FUNCT3_ADD_SUB: begin
             if (funct7 == `INST_FUNCT7_1) begin // ADD
@@ -104,8 +104,8 @@ module ex(
       end
 
       `INST_OP_TYPE_I_JALR: begin
-        regs_write_en <= `true;
-        regs_write_addr <= rd;
+        regs_write_en = `true;
+        regs_write_addr = rd;
         regs_write_data = inst_addr + 4;
         pc_jump = `true;
         pc_jump_addr = operand1 + operand2;
@@ -118,8 +118,8 @@ module ex(
       end
 
       `INST_OP_TYPE_I_I: begin
-        regs_write_en <= `true;
-        regs_write_addr <= rd;
+        regs_write_en = `true;
+        regs_write_addr = rd;
         case (funct3)
           `INST_FUNCT3_ADDI: begin
             regs_write_data = $signed(operand1) + $signed(operand2);
@@ -172,8 +172,8 @@ module ex(
       end
 
       `INST_OP_TYPE_U_LUI, `INST_OP_TYPE_U_AUIPC: begin
-        regs_write_en <= `true;
-        regs_write_addr <= rd;
+        regs_write_en = `true;
+        regs_write_addr = rd;
         regs_write_data = operand1 + operand2;
       end
 
@@ -202,9 +202,9 @@ module ex(
       end
 
       `INST_OP_TYPE_J_JAL: begin
-        regs_write_en <= `true;
-        regs_write_addr <= rd;
-        regs_write_data <= inst_addr + 4;
+        regs_write_en = `true;
+        regs_write_addr = rd;
+        regs_write_data = inst_addr + 4;
         pc_jump = `true;
         pc_jump_addr = $signed(operand1) + $signed(operand2);
       end

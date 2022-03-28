@@ -11,10 +11,10 @@ module dff #(
 
   always @ (posedge clk or posedge rst) begin
     if (rst) begin
-      q = flush_data;
+      q <= flush_data;
     end
     else if (en) begin
-      q = d;
+      q <= d;
     end
   end
 
