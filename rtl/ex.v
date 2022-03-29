@@ -61,6 +61,9 @@ module ex(
     mem_store_addr = 0;
     mem_store_data = 0;
 
+    unpause_signal = `false;
+    flush_signal = `false;
+
     case (opcode)
       `INST_OP_TYPE_R: begin
         regs_write_en = `true;
@@ -109,6 +112,8 @@ module ex(
         regs_write_data = inst_addr + 4;
         pc_jump = `true;
         pc_jump_addr = operand1 + operand2;
+        unpause_signal = `true;
+        flush_signal = `true;
       end
 
       `INST_OP_TYPE_I_L: begin
@@ -199,6 +204,7 @@ module ex(
           end
         endcase
         pc_jump_addr = pc_jump ? $signed(inst_addr) + $signed({imm_b, 1'b0}) : 0;
+        flush_signal = pc_jump;
       end
 
       `INST_OP_TYPE_J_JAL: begin
@@ -207,6 +213,8 @@ module ex(
         regs_write_data = inst_addr + 4;
         pc_jump = `true;
         pc_jump_addr = $signed(operand1) + $signed(operand2);
+        unpause_signal = `true;
+        flush_signal = `true;
       end
     endcase
   end

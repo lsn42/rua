@@ -12,11 +12,11 @@ module pc(
     if (rst) begin
       out <= `CPU_START_ADDR;
     end
-    else if (pause) begin
-      out <= out;
-    end
     else if (jump) begin
       out <= jump_addr;
+    end
+    else if (pause) begin
+      out <= out;
     end
     else begin
       out <= out + 4;

@@ -16,34 +16,37 @@
 module rua(
     input wire clk, input wire rst
   );
+  // ctrl
+  wire pause, flush;
 
-  wire pause_signal, unpause_signal, pause;
-  wire flush_signal, flush;
-
+  // ram
   wire[`XLEN_WIDTH] ram_addr1, ram_addr2;
   wire[`XLEN_WIDTH] ram_data1, ram_data2;
   wire ram_write_en;
   wire[`XLEN_WIDTH] ram_write_addr;
   wire[`XLEN_WIDTH] ram_write_data;
 
+  // pc/ifu
   wire[`XLEN_WIDTH] pc_out;
   wire pc_jump;
   wire[`XLEN_WIDTH] pc_jump_addr;
-
   wire[`XLEN_WIDTH] ifu_out;
 
+  // id
   wire[`REG_ADDR] regs_addr1, regs_addr2;
   wire[`XLEN_WIDTH] regs_out1, regs_out2;
   wire[`XLEN_WIDTH] operand1;
   wire[`XLEN_WIDTH] operand2;
-  wire id_pause;
   wire id_pause_signal;
 
+  // ex
   wire regs_write_en;
   wire[`XLEN_WIDTH] regs_write_data;
   wire[`REG_ADDR] regs_write_addr;
   wire ex_unpause_signal;
+  wire ex_flush_signal;
 
+  // mem
   wire mem_load_en;
   wire[`XLEN_WIDTH] mem_load_addr;
   wire[`REG_ADDR] mem_load_regs_addr;
@@ -56,11 +59,17 @@ module rua(
   wire mem_unpause_signal;
 
   ctrl ctrl(
-    .clk(clk), .rst(rst),
-    .pause_signal(pause_signal), .unpause_signal(unpause_signal), .pause(pause),
-    .flush_signal(flush_signal), .flush(flush));
+         // input: clk, rst
+         .clk(clk), .rst(rst),
+         // input: pause, unpause and flush signals from different modules
+         .id_pause_signal(id_pause_signal),
+         .ex_unpause_signal(ex_unpause_signal), .ex_flush_signal(ex_flush_signal),
+         .mem_unpause_signal(mem_unpause_signal),
+         // output pause and flush signals
+         .pause(pause), .flush(flush));
 
   ram ram(
+        // input: clk, rst
         .clk(clk), .rst(rst),
 
         .addr1(ram_addr1), .out1(ram_data1),
@@ -70,6 +79,7 @@ module rua(
         .write_data(ram_write_data));
 
   pc pc(
+       // input: clk, rst
        .clk(clk), .rst(rst),
        .jump(pc_jump), .jump_addr(pc_jump_addr),
        .pause(pause),
@@ -78,7 +88,8 @@ module rua(
   ifu ifu(
         .pc(pc_out),
         .data(ram_data1), .addr(ram_addr1),
-        .inst(ifu_out));
+        .inst(ifu_out),
+        .flush(flush));
 
   wire[`XLEN_WIDTH] inst_addr_id;
   dff#(`XLEN) dff_inst_addr_id(
@@ -93,7 +104,7 @@ module rua(
 
        .operand1(operand1), .operand2(operand2),
 
-       .pause_signal(pause_signal));
+       .pause_signal(id_pause_signal));
 
   regs regs(
          .clk(clk), .rst(rst),
@@ -109,27 +120,22 @@ module rua(
 
   wire[`XLEN_WIDTH] inst_ex;
   dff#(`XLEN, `INST_NOP) dff_inst_ex(
-       .en(!pause), .clk(clk), .rst(rst),
+       .en(`true), .clk(clk), .rst(rst | flush),
        .d(ifu_out), .q(inst_ex));
-
-  wire[`XLEN_WIDTH] inst_test;
-  dff#(`XLEN, `INST_NOP) dff_inst_test(
-       .en(!pause), .clk(clk), .rst(rst),
-       .d(inst_ex), .q(inst_test));
 
   wire[`XLEN_WIDTH] inst_addr_ex;
   dff#(`XLEN) dff_inst_addr_ex(
-       .en(!pause), .clk(clk), .rst(rst),
+       .en(`true), .clk(clk), .rst(rst),
        .d(inst_addr_id), .q(inst_addr_ex));
 
   wire [`XLEN_WIDTH] operand1_ex;
   dff#(`XLEN) dff_operand1_ex(
-       .en(!pause), .clk(clk), .rst(rst),
+       .en(`true), .clk(clk), .rst(rst | flush),
        .d(operand1), .q(operand1_ex));
 
   wire [`XLEN_WIDTH] operand2_ex;
   dff#(`XLEN) dff_operand2_ex(
-       .en(!pause), .clk(clk), .rst(rst),
+       .en(`true), .clk(clk), .rst(rst | flush),
        .d(operand2), .q(operand2_ex));
 
   ex ex(
@@ -147,7 +153,7 @@ module rua(
        .mem_store_en(mem_store_en), .mem_store_addr(mem_store_addr),
        .mem_store_data(mem_store_data),
 
-       .unpause_signal(ex_unpause_signal)
+       .unpause_signal(ex_unpause_signal), .flush_signal(ex_flush_signal)
      );
 
   mem mem(
