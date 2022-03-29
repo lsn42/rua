@@ -2,22 +2,26 @@
 `include "define/inst.v"
 
 module ctrl(
-    // clk, rst
+    // input: clock, reset
     input wire clk, input wire rst,
-    // pause, unpause, flush signals from different modules
+    // input: pause, unpause and flush signals from different modules
+    // 输入：各模块传递过来的暂停、恢复和清洗的请求信号
     input id_pause_signal,
     input ex_unpause_signal, input ex_flush_signal,
     input mem_unpause_signal,
-    // output pause and flush signals
+    // output: output pause and flush signals after judgement
+    // 输出：裁定后向各模块发送的暂停、清洗命令
     output reg pause, output reg flush
   );
 
   always@(posedge clk or posedge rst) begin
-    // rst
+    // reset
+    // 重置
     if (rst) begin
       pause <= `false;
     end
     // pause judgement
+    // 暂停裁定
     if (ex_unpause_signal | mem_unpause_signal) begin
       pause <= `false;
     end
@@ -25,6 +29,7 @@ module ctrl(
       pause <= `true;
     end
     // flush judgement
+    // 清洗裁定
     if (ex_flush_signal) begin
       flush <= `true;
       pause <= `false;

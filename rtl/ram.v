@@ -1,11 +1,16 @@
 `include "define/const.v"
 
 module ram (
+    // input: clock, reset
     input wire clk, input wire rst,
-    
-    input wire[`XLEN_WIDTH] addr1, output reg[`XLEN_WIDTH] out1,
-    input wire[`XLEN_WIDTH] addr2, output reg[`XLEN_WIDTH] out2,
-
+    // input: double address input
+    // 输入：双口地址
+    input wire[`XLEN_WIDTH] addr1, input wire[`XLEN_WIDTH] addr2,
+    // output: double data output
+    // 输出：双口数据
+    output reg[`XLEN_WIDTH] out1, output reg[`XLEN_WIDTH] out2,
+    // input: write enable, address and writing data
+    // 输入：写使能、地址和将写入的数据
     input wire write_en, input wire[`XLEN_WIDTH] write_addr,
     input wire[`XLEN_WIDTH] write_data
   );

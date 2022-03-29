@@ -3,14 +3,20 @@
 `include "define/inst.v"
 
 module regs (
+    // input: clock, reset
     input wire clk, input wire rst,
-
-    input wire[`REG_ADDR] addr1, output reg[`XLEN_WIDTH] out1,
-    input wire[`REG_ADDR] addr2, output reg[`XLEN_WIDTH] out2,
-
+    // input: double address input
+    // 输入：双口地址
+    input wire[`REG_ADDR] addr1, input wire[`REG_ADDR] addr2,
+    // output: double data output
+    // 输出：双口数据
+    output reg[`XLEN_WIDTH] out1, output reg[`XLEN_WIDTH] out2,
+    // input: write enable, address and writing data
+    // 输入：写使能、地址和将写入的数据
     input wire write_en, input wire[`REG_ADDR] write_addr,
     input wire[`XLEN_WIDTH] write_data,
-
+    // input: write enable, address and writing data
+    // 输入：来自存储器的写使能、地址和将写入的数据
     input wire mem_write_en, input wire[`REG_ADDR] mem_write_addr,
     input wire[`XLEN_WIDTH] mem_write_data
   );

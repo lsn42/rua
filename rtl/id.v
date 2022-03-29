@@ -3,13 +3,21 @@
 `include "define/inst.v"
 
 module id(
+    // input: instruction and it's address
+    // 输入：指令与其地址
     input wire[`XLEN_WIDTH] inst, input wire[`XLEN_WIDTH] inst_addr,
-
-    output reg[`REG_ADDR] regs_addr1, input wire[`XLEN_WIDTH] regs_data1,
-    output reg[`REG_ADDR] regs_addr2, input wire[`XLEN_WIDTH] regs_data2,
-
+    // output: double address of registers that are accessing, decode from instruction
+    // 输出：从指令中获取的两个将要访问的寄存器的地址
+    output reg[`REG_ADDR] regs_addr1, output reg[`REG_ADDR] regs_addr2,
+    // input: double data from registers
+    // 输入：来自两个寄存器的数据
+    input wire[`XLEN_WIDTH] regs_data1, input wire[`XLEN_WIDTH] regs_data2,
+    // output: two preprocessed operands by decoding immediates from
+    // instruction or acquire from registers
+    // 输出：根据指令中的立即数或从寄存器中获取的两个与处理好的操作数
     output reg[`XLEN_WIDTH] operand1, output reg[`XLEN_WIDTH] operand2,
-
+    // output: pause and flush signal according to instruction type
+    // 输出：根据指令类型输出暂停和清洗信号
     output reg pause_signal, output reg flush_signal
   );
 

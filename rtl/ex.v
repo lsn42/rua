@@ -3,20 +3,29 @@
 `include "define/inst.v"
 
 module ex(
+    // input: instruction and it's address
+    // 输入：指令与其地址
     input wire[`XLEN_WIDTH] inst, input wire[`XLEN_WIDTH] inst_addr,
-
+    // input: two operands
+    // 输入：两个操作数
     input wire[`XLEN_WIDTH] operand1, input wire[`XLEN_WIDTH] operand2,
-
+    // output: register write enable, address and writing data
+    // 输出：寄存器写使能，地址和将写入的数据
     output reg regs_write_en, output reg[`REG_ADDR] regs_write_addr,
     output reg[`XLEN_WIDTH] regs_write_data,
-
+    // output: jump flag and jump address, pause flag
+    // 输出：跳转标志和跳转地址，暂停标志
     output reg pc_jump, output reg[`XLEN_WIDTH] pc_jump_addr,
-
+    // output: memory load enable, address and destination register of loaded data
+    // 输出：存储器加载使能，地址和加载的数据的目的寄存器
     output reg mem_load_en, output reg[`XLEN_WIDTH] mem_load_addr,
     output reg[`REG_ADDR] mem_load_regs_addr,
+    // output: memory store enable, address and storing data
+    // 输出：存储器存储使能，地址和将存储的数据
     output reg mem_store_en, output reg[`XLEN_WIDTH] mem_store_addr,
     output reg[`XLEN_WIDTH] mem_store_data,
-
+    // output: unpause and flush signal according to instruction type
+    // 输出：根据指令类型输出的恢复和清洗信号
     output reg unpause_signal, output reg flush_signal
   );
 

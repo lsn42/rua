@@ -3,19 +3,30 @@
 `include "define/inst.v"
 
 module mem(
+    // input: load enable, address and data
+    // 输入：加载使能、地址和数据
     input wire load_en, input wire[`XLEN_WIDTH] load_addr,
     input wire[`REG_ADDR] load_regs_addr,
-    
+    // input: store enable, address and data
+    // 输入：存储使能、地址和数据
     input wire store_en, input wire[`XLEN_WIDTH] store_addr,
     input wire[`XLEN_WIDTH] store_data,
-
-    output reg[`XLEN_WIDTH] ram_read_addr, input wire[`XLEN_WIDTH] ram_read_data,
+    // output: RAM read address
+    // 输出：RAM读地址
+    output reg[`XLEN_WIDTH] ram_read_addr,
+    // output: RAM read address
+    // 输出：RAM读地址
+    input wire[`XLEN_WIDTH] ram_read_data,
+    // output: RAM write enable, address and data
+    // 输出：RAM写使能、地址和数据
     output reg ram_write_en,
     output reg[`XLEN_WIDTH] ram_write_addr, output reg[`XLEN_WIDTH] ram_write_data,
-
+    // output: register write enable, address and data
+    // 输出：寄存器写使能、地址和数据
     output reg regs_write_en, output reg[`REG_ADDR] regs_write_addr,
     output reg[`XLEN_WIDTH] regs_write_data,
-
+    // output: unpause signal after loaded data
+    // 输出：加载数据后的恢复信号
     output reg unpause_signal
   );
 
