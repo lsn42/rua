@@ -16,8 +16,8 @@ module rua_tb();
   initial begin
     $dumpfile("./wave/rua_tb.vcd");
     $dumpvars;
-    $readmemh("./program/mem/hex/empty32.word.mem", dut.regs.data, 0, 31);
-    $readmemh("./program/mem/hex/fibonacci.byte.mem", dut.ram.data, 0, 5299);
+    $readmemh("./program/mem/empty32.mem", dut.regs.data, 0, 31);
+    $readmemh("./program/mem/fibonacci.mem", dut.ram.data, 0, 8'hd6);
     rst = 1;
     @(posedge clk) rst = 0;
     for (i = 0; i < 100; i = i + 1) begin
