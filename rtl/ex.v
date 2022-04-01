@@ -22,7 +22,7 @@ module ex(
     output reg[`REG_ADDR] mem_load_regs_addr,
     // output: memory store enable, address and storing data
     // 输出：存储器存储使能，地址和将存储的数据
-    output reg mem_store_en, output reg[`XLEN_WIDTH] mem_store_addr,
+    output reg[1: 0] mem_store_mode, output reg[`XLEN_WIDTH] mem_store_addr,
     output reg[`XLEN_WIDTH] mem_store_data,
     // output: unpause and flush signal according to instruction type
     // 输出：根据指令类型输出的恢复和清洗信号
@@ -66,7 +66,7 @@ module ex(
     mem_load_en = `false;
     mem_load_addr = 0;
     mem_load_regs_addr = 0;
-    mem_store_en = `false;
+    mem_store_mode = 2'b00;
     mem_store_addr = 0;
     mem_store_data = 0;
 
@@ -180,8 +180,18 @@ module ex(
       end
 
       `INST_OP_TYPE_S: begin
-        mem_store_en = `true;
-        mem_store_addr = operand1 + $signed(imm_s);
+        case (funct3)
+          `INST_FUNCT3_SB: begin
+            mem_store_mode = 2'b01;
+          end
+          `INST_FUNCT3_SH: begin
+            mem_store_mode = 2'b10;
+          end
+          `INST_FUNCT3_SW: begin
+            mem_store_mode = 2'b11;
+          end
+        endcase
+        mem_store_addr = $signed(operand1) + $signed(imm_s);
         mem_store_data = operand2;
       end
 

@@ -22,7 +22,7 @@ module rua(
   // ram
   wire[`XLEN_WIDTH] ram_addr1, ram_addr2;
   wire[`XLEN_WIDTH] ram_data1, ram_data2;
-  wire ram_write_en;
+  wire[1: 0] ram_write_mode;
   wire[`XLEN_WIDTH] ram_write_addr;
   wire[`XLEN_WIDTH] ram_write_data;
 
@@ -50,7 +50,7 @@ module rua(
   wire mem_load_en;
   wire[`XLEN_WIDTH] mem_load_addr;
   wire[`REG_ADDR] mem_load_regs_addr;
-  wire mem_store_en;
+  wire[1: 0] mem_store_mode;
   wire[`XLEN_WIDTH] mem_store_addr;
   wire[`XLEN_WIDTH] mem_store_data;
   wire regs_mem_write_en;
@@ -81,7 +81,7 @@ module rua(
         .out1(ram_data1), .out2(ram_data2),
         // input: write enable, address and writing data
         // 输入：写使能、地址和将写入的数据
-        .write_en(ram_write_en), .write_addr(ram_write_addr),
+        .write_mode(ram_write_mode), .write_addr(ram_write_addr),
         .write_data(ram_write_data));
 
   pc pc(
@@ -189,7 +189,7 @@ module rua(
        .mem_load_regs_addr(mem_load_regs_addr),
        // output: memory store enable, address and storing data
        // 输出：存储器存储使能，地址和将存储的数据
-       .mem_store_en(mem_store_en), .mem_store_addr(mem_store_addr),
+       .mem_store_mode(mem_store_mode), .mem_store_addr(mem_store_addr),
        .mem_store_data(mem_store_data),
        // output: unpause and flush signal according to instruction type
        // 输出：根据指令类型输出的恢复和清洗信号
@@ -203,17 +203,17 @@ module rua(
         .load_regs_addr(mem_load_regs_addr),
         // input: store enable, address and data
         // 输入：存储使能、地址和数据
-        .store_en(mem_store_en), .store_addr(mem_store_addr),
+        .store_mode(mem_store_mode), .store_addr(mem_store_addr),
         .store_data(mem_store_data),
         // output: RAM read address
         // 输出：RAM读地址
         .ram_read_addr(ram_addr2),
         // output: RAM read address
-        // 输出：RAM读地址.ram_read_data(ram_data2),
+        // 输出：RAM读地址
         .ram_read_data(ram_data2),
         // output: RAM write enable, address and data
         // 输出：RAM写使能、地址和数据
-        .ram_write_en(ram_write_en),
+        .ram_write_mode(ram_write_mode),
         .ram_write_addr(ram_write_addr), .ram_write_data(ram_write_data),
         // output: register write enable, address and data
         // 输出：寄存器写使能、地址和数据

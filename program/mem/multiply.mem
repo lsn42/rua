@@ -1,0 +1,17 @@
+// MEM file.
+//
+// Release 14.6 - Data2MEM P_INT.20180321, build 3.0.10 Apr 3, 2013
+// Copyright (c) 1995-2022 Xilinx, Inc.  All rights reserved.
+//
+// Command: data2mem.exe -bd ./program/bin/multiply.elf -d -o m ./program/mem/multiply.mem
+//
+//     .\program\bin\multiply.elf
+
+
+// Program header record #0, Size = 0x74, at 0x00000000 to 0x00000073.
+
+@00000000
+    6F 00 40 04 6F 00 C0 03 13 01 01 FE 23 2E 81 00 13 04 01 02 93 07 B0 07 23 26 F4 FE 83 27 C4 FE
+    93 97 47 00 23 24 F4 FE 93 07 00 00 13 85 07 00 03 24 C1 01 13 01 01 02 67 80 00 00 00 00 00 00
+    73 00 20 30 93 01 40 07 17 11 00 00 13 01 81 BB 93 02 40 07 13 03 40 07 63 F8 62 00 23 A0 02 00
+    93 82 42 00 E3 EC 62 FE EF F0 1F FA 6F 00 00 00 00 00 00 00

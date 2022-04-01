@@ -9,17 +9,17 @@ module mem(
     input wire[`REG_ADDR] load_regs_addr,
     // input: store enable, address and data
     // 输入：存储使能、地址和数据
-    input wire store_en, input wire[`XLEN_WIDTH] store_addr,
+    input wire[1: 0] store_mode, input wire[`XLEN_WIDTH] store_addr,
     input wire[`XLEN_WIDTH] store_data,
     // output: RAM read address
     // 输出：RAM读地址
     output reg[`XLEN_WIDTH] ram_read_addr,
     // output: RAM read address
-    // 输出：RAM读地址
+    // 输出：RAM读数据
     input wire[`XLEN_WIDTH] ram_read_data,
     // output: RAM write enable, address and data
-    // 输出：RAM写使能、地址和数据
-    output reg ram_write_en,
+    // 输出：RAM写模式、地址和数据
+    output reg[1: 0] ram_write_mode,
     output reg[`XLEN_WIDTH] ram_write_addr, output reg[`XLEN_WIDTH] ram_write_data,
     // output: register write enable, address and data
     // 输出：寄存器写使能、地址和数据
@@ -34,7 +34,7 @@ module mem(
 
     // default value
     ram_read_addr = 0;
-    ram_write_en = `false;
+    ram_write_mode = 2'b00;
     ram_write_addr = 0;
     ram_write_data = 0;
     regs_write_en = `false;
@@ -42,17 +42,17 @@ module mem(
     regs_write_data = 0;
     unpause_signal = `false;
 
+    // 现在是直接传递
+    ram_write_mode = store_mode;
+    ram_write_addr = store_addr;
+    ram_write_data = store_data;
+
     if (load_en) begin
       ram_read_addr = load_addr;
       regs_write_en = `true;
       regs_write_addr = load_regs_addr;
       regs_write_data = ram_read_data;
       unpause_signal = `true;
-    end
-    if (store_en) begin
-      ram_write_en = `true;
-      ram_write_addr = store_addr;
-      ram_write_data = store_data;
     end
   end
 
