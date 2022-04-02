@@ -5,7 +5,7 @@
 module mem(
     // input: load enable, address and data
     // 输入：加载使能、地址和数据
-    input wire load_en, input wire[`XLEN_WIDTH] load_addr,
+    input wire[2: 0] load_mode, input wire[`XLEN_WIDTH] load_addr,
     input wire[`REG_ADDR] load_regs_addr,
     // input: store enable, address and data
     // 输入：存储使能、地址和数据
@@ -47,13 +47,29 @@ module mem(
     ram_write_addr = store_addr;
     ram_write_data = store_data;
 
-    if (load_en) begin
-      ram_read_addr = load_addr;
-      regs_write_en = `true;
-      regs_write_addr = load_regs_addr;
-      regs_write_data = ram_read_data;
-      unpause_signal = `true;
-    end
+    ram_read_addr = load_addr;
+    regs_write_en = `true;
+    regs_write_addr = load_regs_addr;
+    unpause_signal = `true;
+    case (load_mode)
+      `INST_FUNCT3_LB:
+        regs_write_data = $signed(ram_read_data[7: 0]);
+      `INST_FUNCT3_LH:
+        regs_write_data = $signed(ram_read_data[15: 0]);
+      `INST_FUNCT3_LW:
+        regs_write_data = ram_read_data;
+      `INST_FUNCT3_LBU:
+        regs_write_data = $unsigned(ram_read_data[7: 0]);
+      `INST_FUNCT3_LHU:
+        regs_write_data = $unsigned(ram_read_data[15: 0]);
+      default: begin
+        ram_read_addr = 0;
+        regs_write_en = `false;
+        regs_write_addr = 0;
+        regs_write_data = 0;
+        unpause_signal = `false;
+      end
+    endcase
   end
 
 endmodule

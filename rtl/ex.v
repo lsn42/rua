@@ -18,7 +18,7 @@ module ex(
     output reg pc_jump, output reg[`XLEN_WIDTH] pc_jump_addr,
     // output: memory load enable, address and destination register of loaded data
     // 输出：存储器加载使能，地址和加载的数据的目的寄存器
-    output reg mem_load_en, output reg[`XLEN_WIDTH] mem_load_addr,
+    output reg[2: 0] mem_load_mode, output reg[`XLEN_WIDTH] mem_load_addr,
     output reg[`REG_ADDR] mem_load_regs_addr,
     // output: memory store enable, address and storing data
     // 输出：存储器存储使能，地址和将存储的数据
@@ -63,9 +63,10 @@ module ex(
     pc_jump = `false;
     pc_jump_addr = 0;
 
-    mem_load_en = `false;
+    mem_load_mode = 3'b111;
     mem_load_addr = 0;
     mem_load_regs_addr = 0;
+
     mem_store_mode = 2'b00;
     mem_store_addr = 0;
     mem_store_data = 0;
@@ -126,7 +127,7 @@ module ex(
       end
 
       `INST_OP_TYPE_I_L: begin
-        mem_load_en = `true;
+        mem_load_mode = funct3;
         mem_load_addr = operand1 + operand2;
         mem_load_regs_addr = rd;
       end

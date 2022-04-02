@@ -47,7 +47,7 @@ module rua(
   wire ex_flush_signal;
 
   // mem
-  wire mem_load_en;
+  wire[2: 0] mem_load_mode;
   wire[`XLEN_WIDTH] mem_load_addr;
   wire[`REG_ADDR] mem_load_regs_addr;
   wire[1: 0] mem_store_mode;
@@ -65,7 +65,7 @@ module rua(
          // 输入：各模块传递过来的暂停、恢复和清洗的请求信号
          .id_pause_signal(id_pause_signal),
          .ex_unpause_signal(ex_unpause_signal), .ex_flush_signal(ex_flush_signal),
-         .mem_unpause_signal(mem_unpause_signal),
+         .mem_unpause_signal(mem_unpause_signal_wait_for_regs),
          // output: output pause and flush signals after judgement
          // 输出：裁定后向各模块发送的暂停、清洗命令
          .pause(pause), .flush(flush));
@@ -185,7 +185,7 @@ module rua(
        .pc_jump(pc_jump), .pc_jump_addr(pc_jump_addr),
        // output: memory load enable, address and destination register of loaded data
        // 输出：存储器加载使能，地址和加载的数据的目的寄存器
-       .mem_load_en(mem_load_en), .mem_load_addr(mem_load_addr),
+       .mem_load_mode(mem_load_mode), .mem_load_addr(mem_load_addr),
        .mem_load_regs_addr(mem_load_regs_addr),
        // output: memory store enable, address and storing data
        // 输出：存储器存储使能，地址和将存储的数据
@@ -199,7 +199,7 @@ module rua(
   mem mem(
         // input: load enable, address and data
         // 输入：加载使能、地址和数据
-        .load_en(mem_load_en), .load_addr(mem_load_addr),
+        .load_mode(mem_load_mode), .load_addr(mem_load_addr),
         .load_regs_addr(mem_load_regs_addr),
         // input: store enable, address and data
         // 输入：存储使能、地址和数据
@@ -223,5 +223,10 @@ module rua(
         // 输出：加载数据后的恢复信号
         .unpause_signal(mem_unpause_signal)
       );
+
+  wire mem_unpause_signal_wait_for_regs;
+  dff#(1) dff_mem_unpause_signal_wait_for_regs(
+       .en(`true), .clk(clk), .rst(rst | flush),
+       .d(mem_unpause_signal), .q(mem_unpause_signal_wait_for_regs));
 
 endmodule
