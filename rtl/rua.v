@@ -84,20 +84,22 @@ module rua(
         .write_mode(ram_write_mode), .write_addr(ram_write_addr),
         .write_data(ram_write_data));
 
-  pc pc(
-       // input: clock, reset
-       .clk(clk), .rst(rst),
-       // input: jump flag and jump address, pause flag
-       // 输入：跳转标志和跳转地址，暂停标志
-       .jump(pc_jump), .jump_addr(pc_jump_addr), .pause(pause),
-       // output: program counter output
-       // 输出：程序计数器输出
-       .out(pc_out));
-
+//   pc pc(
+//        // input: clock, reset
+//        .clk(clk), .rst(rst),
+//        // input: jump flag and jump address, pause flag
+//        // 输入：跳转标志和跳转地址，暂停标志
+//        .jump(pc_jump), .jump_addr(pc_jump_addr), .pause(pause),
+//        // output: program counter output
+//        // 输出：程序计数器输出
+//        .out(pc_out));
+wire[`XLEN_WIDTH] ifu_inst_addr;
   ifu ifu(
+       .clk(clk), .rst(rst),
         // input: program counter and flush flag
         // 输入：程序计数器和清洗标志
-        .pc(pc_out), .flush(flush),
+        .flush(flush),
+       .jump(pc_jump), .jump_addr(pc_jump_addr), .pause(pause),
         // output: address of memory accessing
         // 输出：将访问的存储器地址
         .addr(ram_addr1),
@@ -106,17 +108,18 @@ module rua(
         .data(ram_data1),
         // output: instruction fecthed
         // 输出：获取到的指令
-        .inst(ifu_out));
+        .inst(ifu_out),
+        .inst_addr(ifu_inst_addr));
 
-  wire[`XLEN_WIDTH] inst_addr_id;
-  dff#(`XLEN) dff_inst_addr_id(
-       .en(!pause), .clk(clk), .rst(rst),
-       .d(pc_out), .q(inst_addr_id));
+//   wire[`XLEN_WIDTH] inst_addr_id;
+//   dff#(`XLEN) dff_inst_addr_id(
+//        .en(!pause), .clk(clk), .rst(rst),
+//        .d(pc_out), .q(inst_addr_id));
 
   id id(
        // input: instruction and it's address
        // 输入：指令与其地址
-       .inst(ifu_out), .inst_addr(inst_addr_id),
+       .inst(ifu_out), .inst_addr(ifu_inst_addr),
        // output: double address of registers that are accessing, decode from instruction
        // 输出：从指令中获取的两个将要访问的寄存器的地址
        .regs_addr1(regs_addr1), .regs_addr2(regs_addr2),
@@ -157,7 +160,7 @@ module rua(
   wire[`XLEN_WIDTH] inst_addr_ex;
   dff#(`XLEN) dff_inst_addr_ex(
        .en(`true), .clk(clk), .rst(rst),
-       .d(inst_addr_id), .q(inst_addr_ex));
+       .d(ifu_inst_addr), .q(inst_addr_ex));
 
   wire [`XLEN_WIDTH] operand1_ex;
   dff#(`XLEN) dff_operand1_ex(
