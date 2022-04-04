@@ -2,7 +2,7 @@
 `include "define/const.v"
 `include "define/inst.v"
 
-`include "rtl/util/dff.v"
+`include "rtl/util/pldff.v"
 
 module ifu (
     // input: clock, reset
@@ -27,10 +27,11 @@ module ifu (
 
   reg[`XLEN_WIDTH] pc;
 
-  dff#(`XLEN) dff_inst_addr(
+  pldff#(`XLEN) dff_inst_addr(
        .en(!pause), .clk(clk), .rst(rst | flush),
        .d(pc), .q(inst_addr));
 
+  // PC change
   always @(posedge clk or posedge rst) begin
     if (rst) begin
       pc <= `CPU_START_ADDR;
@@ -46,6 +47,7 @@ module ifu (
     end
   end
 
+  // select
   always @(* ) begin
     addr = pc;
     if (flush) begin
