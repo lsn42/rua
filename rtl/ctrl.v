@@ -32,7 +32,6 @@ module ctrl(
     // 清洗裁定
     if (ex_flush_signal) begin
       flush <= `true;
-      pause <= `false;
     end
     else begin
       flush <= `false;

@@ -11,7 +11,7 @@
 `include "rtl/ram.v"
 `include "rtl/mem.v"
 `include "rtl/pc.v"
-`include "rtl/util/dff.v"
+`include "rtl/util/pldff.v"
 
 module rua(
     input wire clk, input wire rst
@@ -65,7 +65,7 @@ module rua(
          // 输入：各模块传递过来的暂停、恢复和清洗的请求信号
          .id_pause_signal(id_pause_signal),
          .ex_unpause_signal(ex_unpause_signal), .ex_flush_signal(ex_flush_signal),
-         .mem_unpause_signal(mem_unpause_signal_wait_for_regs),
+         .mem_unpause_signal(mem_unpause_signal),
          // output: output pause and flush signals after judgement
          // 输出：裁定后向各模块发送的暂停、清洗命令
          .pause(pause), .flush(flush));
@@ -153,22 +153,22 @@ wire[`XLEN_WIDTH] ifu_inst_addr;
          .mem_write_data(regs_mem_write_data));
 
   wire[`XLEN_WIDTH] inst_ex;
-  dff#(`XLEN, `INST_NOP) dff_inst_ex(
+  pldff#(`XLEN, `INST_NOP) dff_inst_ex(
        .en(`true), .clk(clk), .rst(rst | flush),
        .d(ifu_out), .q(inst_ex));
 
   wire[`XLEN_WIDTH] inst_addr_ex;
-  dff#(`XLEN) dff_inst_addr_ex(
-       .en(`true), .clk(clk), .rst(rst),
+  pldff#(`XLEN) dff_inst_addr_ex(
+       .en(`true), .clk(clk), .rst(rst | flush),
        .d(ifu_inst_addr), .q(inst_addr_ex));
 
   wire [`XLEN_WIDTH] operand1_ex;
-  dff#(`XLEN) dff_operand1_ex(
+  pldff#(`XLEN) dff_operand1_ex(
        .en(`true), .clk(clk), .rst(rst | flush),
        .d(operand1), .q(operand1_ex));
 
   wire [`XLEN_WIDTH] operand2_ex;
-  dff#(`XLEN) dff_operand2_ex(
+  pldff#(`XLEN) dff_operand2_ex(
        .en(`true), .clk(clk), .rst(rst | flush),
        .d(operand2), .q(operand2_ex));
 
@@ -200,6 +200,8 @@ wire[`XLEN_WIDTH] ifu_inst_addr;
      );
 
   mem mem(
+         // input: clock, reset
+         .clk(clk), .rst(rst),
         // input: load enable, address and data
         // 输入：加载使能、地址和数据
         .load_mode(mem_load_mode), .load_addr(mem_load_addr),
@@ -227,9 +229,9 @@ wire[`XLEN_WIDTH] ifu_inst_addr;
         .unpause_signal(mem_unpause_signal)
       );
 
-  wire mem_unpause_signal_wait_for_regs;
-  dff#(1) dff_mem_unpause_signal_wait_for_regs(
-       .en(`true), .clk(clk), .rst(rst | flush),
-       .d(mem_unpause_signal), .q(mem_unpause_signal_wait_for_regs));
+//   wire mem_unpause_signal_wait_for_regs;
+//   pldff#(1) dff_mem_unpause_signal_wait_for_regs(
+//        .en(`true), .clk(clk), .rst(rst),
+//        .d(mem_unpause_signal), .q(mem_unpause_signal_wait_for_regs));
 
 endmodule

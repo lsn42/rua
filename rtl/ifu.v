@@ -27,9 +27,11 @@ module ifu (
 
   reg[`XLEN_WIDTH] pc;
 
+  reg[`XLEN_WIDTH] _addr, s;
+
   pldff#(`XLEN) dff_inst_addr(
-       .en(!pause), .clk(clk), .rst(rst | flush),
-       .d(pc), .q(inst_addr));
+         .en(!pause), .clk(clk), .rst(rst | flush),
+         .d(pc), .q(inst_addr));
 
   // PC change
   always @(posedge clk or posedge rst) begin
@@ -45,19 +47,29 @@ module ifu (
     else begin
       pc <= pc + 4;
     end
+    // _inst = data;
+    s <= pause ? s : _addr;
   end
 
   // select
   always @(* ) begin
-    addr = pc;
+    _addr = pc;
+    // _inst = data;
+    // s = pause ? s : _inst;
     if (flush) begin
       inst = `INST_NOP;
     end
-    else if (pause) begin
-      inst = inst;
-    end
+    // else if (pause) begin
+    //   inst = s;
+    // end
     else begin
       inst = data;
+    end
+    if (pause) begin
+      addr = s;
+    end
+    else begin
+      addr = _addr;
     end
   end
 endmodule

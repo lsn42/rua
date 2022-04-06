@@ -130,6 +130,7 @@ module ex(
         mem_load_mode = funct3;
         mem_load_addr = operand1 + operand2;
         mem_load_regs_addr = rd;
+        flush_signal = `true;
       end
 
       `INST_OP_TYPE_I_I: begin

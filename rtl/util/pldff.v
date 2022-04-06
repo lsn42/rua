@@ -17,7 +17,7 @@ module pldff #(
   end
 
   always @(* ) begin
-    q = rst ? flush_data : en ? _q : s;
+    q = en ? rst ? flush_data : _q : s;
   end
 
 endmodule
