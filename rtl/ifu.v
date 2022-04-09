@@ -1,4 +1,4 @@
-// instruction fetch unit
+// Instruction Fetch Unit
 `include "define/const.v"
 `include "define/inst.v"
 

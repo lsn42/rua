@@ -1,4 +1,4 @@
-// execution
+// EXecution
 `include "define/const.v"
 `include "define/inst.v"
 
@@ -13,20 +13,20 @@ module ex(
     // 输出：寄存器写使能，地址和将写入的数据
     output reg regs_write_en, output reg[`REG_ADDR] regs_write_addr,
     output reg[`XLEN_WIDTH] regs_write_data,
-    // output: jump flag and jump address, pause flag
-    // 输出：跳转标志和跳转地址，暂停标志
+    // output: jump flag and jump address
+    // 输出：跳转标志和跳转地址
     output reg pc_jump, output reg[`XLEN_WIDTH] pc_jump_addr,
-    // output: memory load enable, address and destination register of loaded data
-    // 输出：存储器加载使能，地址和加载的数据的目的寄存器
+    // output: memory load mode, address and destination register of loaded data
+    // 输出：存储器加载模式，地址和加载的数据的目的寄存器
     output reg[2: 0] mem_load_mode, output reg[`XLEN_WIDTH] mem_load_addr,
-    output reg[`REG_ADDR] mem_load_regs_addr,
-    // output: memory store enable, address and storing data
-    // 输出：存储器存储使能，地址和将存储的数据
+    output reg[`REG_ADDR] mem_load_dest_regs_addr,
+    // output: memory store mode, address and storing data
+    // 输出：存储器存储模式，地址和将存储的数据
     output reg[1: 0] mem_store_mode, output reg[`XLEN_WIDTH] mem_store_addr,
     output reg[`XLEN_WIDTH] mem_store_data,
-    // output: unpause and flush signal according to instruction type
-    // 输出：根据指令类型输出的恢复和清洗信号
-    output reg unpause_signal, output reg flush_signal
+    // output: flush signal according to instruction type
+    // 输出：根据指令类型输出的清洗信号
+    output reg flush_signal
   );
 
   // instruction identification
@@ -65,13 +65,12 @@ module ex(
 
     mem_load_mode = 3'b111;
     mem_load_addr = 0;
-    mem_load_regs_addr = 0;
+    mem_load_dest_regs_addr = 0;
 
     mem_store_mode = 2'b00;
     mem_store_addr = 0;
     mem_store_data = 0;
 
-    unpause_signal = `false;
     flush_signal = `false;
 
     case (opcode)
@@ -128,7 +127,7 @@ module ex(
       `INST_OP_TYPE_I_L: begin
         mem_load_mode = funct3;
         mem_load_addr = operand1 + operand2;
-        mem_load_regs_addr = rd;
+        mem_load_dest_regs_addr = rd;
         flush_signal = `true;
       end
 

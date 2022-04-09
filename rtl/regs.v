@@ -1,4 +1,4 @@
-// register
+// REGisterS
 `include "define/const.v"
 `include "define/inst.v"
 
@@ -23,6 +23,7 @@ module regs (
 
   reg[`XLEN_WIDTH] data[`REG_COUNT - 1: 0];
 
+  // write
   always @(posedge clk or posedge rst) begin
     if (rst) begin
       data[0] <= 0;
@@ -35,6 +36,7 @@ module regs (
     end
   end
 
+  // out1
   always @(* ) begin
     if (write_en && write_addr == addr1) begin
       out1 = write_data;
@@ -47,6 +49,7 @@ module regs (
     end
   end
 
+  // out2
   always @(* ) begin
     if (write_en && write_addr == addr2) begin
       out2 = write_data;

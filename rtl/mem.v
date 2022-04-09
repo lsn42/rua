@@ -1,4 +1,4 @@
-// memory
+// MEMory
 `include "define/const.v"
 `include "define/inst.v"
 
@@ -11,8 +11,8 @@ module mem(
     // 输入：加载模式、地址和目的寄存器地址
     input wire[2: 0] load_mode, input wire[`XLEN_WIDTH] load_addr,
     input wire[`REG_ADDR] load_dest_regs_addr,
-    // input: store enable, address and data
-    // 输入：存储使能、地址和数据
+    // input: store mode, address and data
+    // 输入：存储模式、地址和数据
     input wire[1: 0] store_mode, input wire[`XLEN_WIDTH] store_addr,
     input wire[`XLEN_WIDTH] store_data,
     // output: RAM read address

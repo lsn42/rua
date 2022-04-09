@@ -1,3 +1,4 @@
+// Random Access Memory
 `include "define/const.v"
 
 module ram (
@@ -9,8 +10,8 @@ module ram (
     // output: double data output
     // 输出：双口数据
     output reg[`XLEN_WIDTH] out1, output reg[`XLEN_WIDTH] out2,
-    // input: write mode(none, byte, 16-bits, word), address and writing data
-    // 输入：写入模式（不写、字节、16比特、字）、地址和将写入的数据
+    // input: write mode(none, byte, halfword, word), address and writing data
+    // 输入：写入模式（不写、字节、半字、字）、地址和将写入的数据
     input wire[1: 0] write_mode, input wire[`XLEN_WIDTH] write_addr,
     input wire[`XLEN_WIDTH] write_data
   );

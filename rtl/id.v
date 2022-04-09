@@ -1,4 +1,4 @@
-// instruction decode
+// Instruction Decode
 `include "define/const.v"
 `include "define/inst.v"
 
@@ -16,8 +16,8 @@ module id(
     // instruction or acquire from registers
     // 输出：根据指令中的立即数或从寄存器中获取的两个与处理好的操作数
     output reg[`XLEN_WIDTH] operand1, output reg[`XLEN_WIDTH] operand2,
-    // output: pause and flush signal according to instruction type
-    // 输出：根据指令类型输出暂停和清洗信号
+    // output: pause signal according to instruction type
+    // 输出：根据指令类型输出暂停信号
     output reg pause_signal, output reg flush_signal
   );
 
