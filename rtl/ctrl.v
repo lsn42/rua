@@ -14,28 +14,32 @@ module ctrl(
     output reg pause, output reg flush
   );
 
-  always@(posedge clk or posedge rst) begin
+  always@(* ) begin
     // reset
     // 重置
     if (rst) begin
-      pause <= `false;
+      pause = `false;
+      flush = `false;
     end
     // pause judgement
     // 暂停裁定
     if (ex_unpause_signal | mem_unpause_signal) begin
-      pause <= `false;
+      pause = `false;
     end
     else if (id_pause_signal) begin
-      pause <= `true;
+      if (!flush) begin
+        pause = `true;
+      end
+      else begin
+        pause = `false;
+      end
     end
+  end
+
+  always @(posedge clk or posedge rst) begin
     // flush judgement
     // 清洗裁定
-    if (ex_flush_signal) begin
-      flush <= `true;
-    end
-    else begin
-      flush <= `false;
-    end
+    flush <= ex_flush_signal;
   end
 
 endmodule

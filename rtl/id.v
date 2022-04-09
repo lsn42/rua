@@ -67,7 +67,6 @@ module id(
         regs_addr1 = rs1;
         operand1 = regs_data1;
         operand2 = $signed(imm_i);
-        pause_signal = `true;
       end
       `INST_OP_TYPE_I_I: begin
         regs_addr1 = rs1;
@@ -107,7 +106,6 @@ module id(
       `INST_OP_TYPE_J_JAL: begin
         operand1 = inst_addr;
         operand2 = $signed({imm_j, 1'b0});
-        pause_signal = `true;
       end
     endcase
   end

@@ -7,8 +7,8 @@
 module ifu (
     // input: clock, reset
     input wire clk, input wire rst,
-    // input: jump flag and jump address, pause flag
-    // 输入：跳转标志和跳转地址，暂停标志
+    // input: pause flag, jump flag and jump address
+    // 输入：暂停标志，跳转标志和跳转地址
     input wire pause, input wire jump, input wire[`XLEN_WIDTH] jump_addr,
     // output: address of memory accessing
     // 输出：将访问的存储器地址
@@ -17,7 +17,7 @@ module ifu (
     // 输入：存储器返回的数据
     input wire[`XLEN_WIDTH] data,
     // output: instruction fecthed and it's address
-    // 输出：获取到的指令
+    // 输出：获取到的指令和对应地址
     output reg[`XLEN_WIDTH] inst, output wire[`XLEN_WIDTH] inst_addr
   );
 

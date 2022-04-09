@@ -122,7 +122,6 @@ module ex(
         regs_write_data = inst_addr + 4;
         pc_jump = `true;
         pc_jump_addr = operand1 + operand2;
-        unpause_signal = `true;
         flush_signal = `true;
       end
 
@@ -234,7 +233,6 @@ module ex(
         regs_write_data = inst_addr + 4;
         pc_jump = `true;
         pc_jump_addr = $signed(operand1) + $signed(operand2);
-        unpause_signal = `true;
         flush_signal = `true;
       end
     endcase

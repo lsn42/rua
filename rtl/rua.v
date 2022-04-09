@@ -11,7 +11,7 @@
 `include "rtl/ram.v"
 `include "rtl/mem.v"
 `include "rtl/pc.v"
-`include "rtl/util/pldff.v"
+`include "rtl/util/dff.v"
 
 module rua(
     input wire clk, input wire rst
@@ -19,18 +19,18 @@ module rua(
   // ctrl
   wire pause, flush;
 
+  // ifu
+  wire[`XLEN_WIDTH] inst;
+  wire[`XLEN_WIDTH] inst_addr;
+  wire pc_jump;
+  wire[`XLEN_WIDTH] pc_jump_addr;
+
   // ram
   wire[`XLEN_WIDTH] ram_addr1, ram_addr2;
   wire[`XLEN_WIDTH] ram_data1, ram_data2;
   wire[1: 0] ram_write_mode;
   wire[`XLEN_WIDTH] ram_write_addr;
   wire[`XLEN_WIDTH] ram_write_data;
-
-  // pc/ifu
-  wire[`XLEN_WIDTH] pc_out;
-  wire pc_jump;
-  wire[`XLEN_WIDTH] pc_jump_addr;
-  wire[`XLEN_WIDTH] ifu_out;
 
   // id
   wire[`REG_ADDR] regs_addr1, regs_addr2;
@@ -70,6 +70,21 @@ module rua(
          // 输出：裁定后向各模块发送的暂停、清洗命令
          .pause(pause), .flush(flush));
 
+  ifu ifu(
+        .clk(clk), .rst(rst),
+        // input: pause flag, jump flag and jump address
+        // 输入：暂停标志，跳转标志和跳转地址
+        .pause(pause), .jump(pc_jump), .jump_addr(pc_jump_addr),
+        // output: address of memory accessing
+        // 输出：将访问的存储器地址
+        .addr(ram_addr1),
+        // input: memory return data
+        // 输入：存储器返回的数据
+        .data(ram_data1),
+        // output: instruction fecthed and it's address
+        // 输出：获取到的指令和对应地址
+        .inst(inst), .inst_addr(inst_addr));
+
   ram ram(
         // input: clock, reset
         .clk(clk), .rst(rst),
@@ -84,42 +99,10 @@ module rua(
         .write_mode(ram_write_mode), .write_addr(ram_write_addr),
         .write_data(ram_write_data));
 
-//   pc pc(
-//        // input: clock, reset
-//        .clk(clk), .rst(rst),
-//        // input: jump flag and jump address, pause flag
-//        // 输入：跳转标志和跳转地址，暂停标志
-//        .jump(pc_jump), .jump_addr(pc_jump_addr), .pause(pause),
-//        // output: program counter output
-//        // 输出：程序计数器输出
-//        .out(pc_out));
-wire[`XLEN_WIDTH] ifu_inst_addr;
-  ifu ifu(
-       .clk(clk), .rst(rst),
-        // input: program counter and flush flag
-        // 输入：程序计数器和清洗标志
-        .flush(flush),
-       .jump(pc_jump), .jump_addr(pc_jump_addr), .pause(pause),
-        // output: address of memory accessing
-        // 输出：将访问的存储器地址
-        .addr(ram_addr1),
-        // input: memory return data
-        // 输入：存储器返回的数据
-        .data(ram_data1),
-        // output: instruction fecthed
-        // 输出：获取到的指令
-        .inst(ifu_out),
-        .inst_addr(ifu_inst_addr));
-
-//   wire[`XLEN_WIDTH] inst_addr_id;
-//   dff#(`XLEN) dff_inst_addr_id(
-//        .en(!pause), .clk(clk), .rst(rst),
-//        .d(pc_out), .q(inst_addr_id));
-
   id id(
        // input: instruction and it's address
        // 输入：指令与其地址
-       .inst(ifu_out), .inst_addr(ifu_inst_addr),
+       .inst(inst), .inst_addr(inst_addr),
        // output: double address of registers that are accessing, decode from instruction
        // 输出：从指令中获取的两个将要访问的寄存器的地址
        .regs_addr1(regs_addr1), .regs_addr2(regs_addr2),
@@ -153,24 +136,24 @@ wire[`XLEN_WIDTH] ifu_inst_addr;
          .mem_write_data(regs_mem_write_data));
 
   wire[`XLEN_WIDTH] inst_ex;
-  pldff#(`XLEN, `INST_NOP) dff_inst_ex(
-       .en(`true), .clk(clk), .rst(rst | flush),
-       .d(ifu_out), .q(inst_ex));
+  dff#(`XLEN, `INST_NOP) delay_inst_for_ex(
+         .en(`true), .clk(clk), .rst(rst | flush),
+         .d(inst), .q(inst_ex));
 
   wire[`XLEN_WIDTH] inst_addr_ex;
-  pldff#(`XLEN) dff_inst_addr_ex(
-       .en(`true), .clk(clk), .rst(rst | flush),
-       .d(ifu_inst_addr), .q(inst_addr_ex));
+  dff#(`XLEN) delay_inst_addr_for_ex(
+         .en(`true), .clk(clk), .rst(rst | flush),
+         .d(inst_addr), .q(inst_addr_ex));
 
   wire [`XLEN_WIDTH] operand1_ex;
-  pldff#(`XLEN) dff_operand1_ex(
-       .en(`true), .clk(clk), .rst(rst | flush),
-       .d(operand1), .q(operand1_ex));
+  dff#(`XLEN) delay_operand1_for_ex(
+         .en(`true), .clk(clk), .rst(rst | flush),
+         .d(operand1), .q(operand1_ex));
 
   wire [`XLEN_WIDTH] operand2_ex;
-  pldff#(`XLEN) dff_operand2_ex(
-       .en(`true), .clk(clk), .rst(rst | flush),
-       .d(operand2), .q(operand2_ex));
+  dff#(`XLEN) delay_operand2_for_ex(
+         .en(`true), .clk(clk), .rst(rst | flush),
+         .d(operand2), .q(operand2_ex));
 
   ex ex(
        // input: instruction and it's address
@@ -200,12 +183,12 @@ wire[`XLEN_WIDTH] ifu_inst_addr;
      );
 
   mem mem(
-         // input: clock, reset
-         .clk(clk), .rst(rst),
+        // input: clock, reset
+        .clk(clk), .rst(rst),
         // input: load enable, address and data
         // 输入：加载使能、地址和数据
         .load_mode(mem_load_mode), .load_addr(mem_load_addr),
-        .load_regs_addr(mem_load_regs_addr),
+        .load_dest_regs_addr(mem_load_regs_addr),
         // input: store enable, address and data
         // 输入：存储使能、地址和数据
         .store_mode(mem_store_mode), .store_addr(mem_store_addr),
@@ -229,9 +212,9 @@ wire[`XLEN_WIDTH] ifu_inst_addr;
         .unpause_signal(mem_unpause_signal)
       );
 
-//   wire mem_unpause_signal_wait_for_regs;
-//   pldff#(1) dff_mem_unpause_signal_wait_for_regs(
-//        .en(`true), .clk(clk), .rst(rst),
-//        .d(mem_unpause_signal), .q(mem_unpause_signal_wait_for_regs));
+  //   wire mem_unpause_signal_wait_for_regs;
+  //   pldff#(1) dff_mem_unpause_signal_wait_for_regs(
+  //        .en(`true), .clk(clk), .rst(rst),
+  //        .d(mem_unpause_signal), .q(mem_unpause_signal_wait_for_regs));
 
 endmodule
