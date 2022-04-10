@@ -18,7 +18,7 @@ module id(
     output reg[`XLEN_WIDTH] operand1, output reg[`XLEN_WIDTH] operand2,
     // output: pause signal according to instruction type
     // 输出：根据指令类型输出暂停信号
-    output reg pause_signal, output reg flush_signal
+    output reg pause_signal
   );
 
   // instruction identification
@@ -54,7 +54,6 @@ module id(
     operand1 = 0;
     operand2 = 0;
     pause_signal = `false;
-    flush_signal = `false;
 
     case (opcode)
       `INST_OP_TYPE_R: begin
